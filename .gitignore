@@ -1,0 +1,42 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Удаляем вот это — не надо включать target из src/*
+# !**/src/main/**/target/
+# !**/src/test/**/target/
+
+# Project helper files
+HELP.md
+
+# STS (Spring Tool Suite)
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Gradle (если случайно будет создан build/)
+build/
+
+# VS Code
+.vscode/
+
+# OS / Editor junk
+.DS_Store
+Thumbs.db
