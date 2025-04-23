@@ -2,7 +2,7 @@ package com.caltracker.calorie_tracker_api.controller;
 
 import com.caltracker.calorie_tracker_api.entity.MealEntry;
 import com.caltracker.calorie_tracker_api.entity.MealTemplate;
-import com.caltracker.calorie_tracker_api.service.MealService;
+import com.caltracker.calorie_tracker_api.service.MealEntryService;
 import com.caltracker.calorie_tracker_api.service.MealTemplateService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +16,9 @@ import java.util.List;
 public class MealTemplateController {
 
     private final MealTemplateService templateService;
-    private final MealService mealService;
+    private final MealEntryService mealService;
 
-    public MealTemplateController(MealTemplateService templateService, MealService mealService) {
+    public MealTemplateController(MealTemplateService templateService, MealEntryService mealService) {
         this.templateService = templateService;
         this.mealService = mealService;
     }
