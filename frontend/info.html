@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tell me about yourself</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="page-container">
+    <div class="welcome-box">
+      <img src="images/logo.png" alt="logo" class="logo" />
+    </div>
+
+    <p class="title">Tell me about yourself</p>
+    <p class="subtitle">I’ll help you to create your perfect plan!</p>
+
+    <form id="userForm">
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="age">Your age</label>
+          <input type="number" id="age" name="age" required />
+        </div>
+
+        <div class="input-group">
+          <label>Your gender</label> 
+          <div class="gender-buttons">
+            <input type="radio" id="female" name="gender" value="female" class="gender-btn" />
+            <label for="female">♀</label>
+            <input type="radio" id="male" name="gender" value="male" class="gender-btn" />
+            <label for="male">♂</label>
+          </div>
+          <input type="hidden" name="gender" id="gender" />
+        </div>
+
+        <div class="input-group">
+          <label for="height">Your height (cm)</label>
+          <input type="number" id="height" name="height" required />
+        </div>
+
+        <div class="input-group">
+          <label for="weight">Your weight (kg)</label>
+          <input type="number" id="weight" name="weight" required />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="activity">How often do you train?</label>
+        <select id="activity" name="activity" required>
+          <option value="" disabled selected>Select activity level</option>
+          <option value="1.2">Rarely</option>
+          <option value="1.375">1-2 times per week</option>
+          <option value="1.55">3-5 times per week</option>
+          <option value="1.725">6-7 times per week</option>
+          <option value="1.9">Daily intense</option>
+        </select>
+      </div>      
+    </form>
+      <div class="btn-row">    
+        <a href="goal.html" class="continueButton inactive" id="continueButton">Continue</a>
+      </div>
+    <script src="js/info.js"></script>
+    </div>
+</body>
+</html>

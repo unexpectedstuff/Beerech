@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyRecipes</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div class="green-container">
+      <div class="title-container">
+        <img src="images/backmenu.png" class="menu-icon" title="Back" onclick="navigateTo('profile.html')" />
+        <p class="recipes-title">My Recipes</p>  
+        <img src="images/plusmenu.png" class="menu-icon" title="Add" onclick="navigateTo('mealconstructor.html')" /> 
+      </div>
+
+      <div class="scroll-page">
+        <div id="recipe-container">
+            <div class="recipe-card">
+              <div class="meal-first">            
+                  <p class="recipe-title">Pancakes</p>      
+               <div class="meal-actions">
+                  <img src="images/edit.png" class="icon-btn" title="Edit" onclick="editRecipe(this)" />
+                  </div> 
+              </div>
+               <div class="meal-second">
+                  <p class="meal-calories">350 kcal</p> 
+              <div class="meal-actions">
+                  <img src="images/delete.png" class="icon-btn" title="Delete" onclick="deleteRecipe(this)" />
+               </div> 
+              </div>
+                  <div class="meal-nutrients">
+                    <span>Proteins: 20g</span>
+                    <span>Fats: 10g</span>
+                    <span>Carbs: 45g</span>
+                  </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/myrecipes.js"></script>
+</body>
+</html>
