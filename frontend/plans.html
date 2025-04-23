@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyPlans</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div class="page-container">
+      <div class="title-container">
+        <img src="images/backmenu.png" class="menu-icon" title="Back" onclick="navigateTo('profile.html')" />
+        <p class="plans-title">My Plans</p>  
+        <img src="images/plusmenu.png" class="menu-icon" title="Add" onclick="navigateTo('planconstructor.html')" /> 
+      </div>
+
+      <div class="scroll-page">
+        <div id="plans-container">
+            <div class="plan-card">
+              <div class="plan-first">            
+                  <p class="plan-title">Plan 1</p>      
+               <div class="plan-actions">
+                  <img src="images/edit.png" class="icon-btn" title="Edit" onclick="editPlan(this)" />
+                  </div> 
+              </div>
+               <div class="plan-second">
+                  <p class="plan-calories">1500 kcal</p> 
+              <div class="plan-actions">
+                  <img src="images/delete.png" class="icon-btn" title="Delete" onclick="deletePlan(this)" />
+               </div> 
+              </div>
+                  <div class="plan-nutrients">
+                    <span>Proteins: 120g</span>
+                    <span>Fats: 50g</span>
+                    <span>Carbs: 160g</span>
+                  </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <script src="js/plans.js"></script>
+</body>
+</html>
