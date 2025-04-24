@@ -36,7 +36,7 @@ public class UserServiceTest {
         when(repo.findByEmail(email)).thenReturn(Optional.of(saved));
 
         // Act: Register a user with the service
-        User registered = service.registerUser(email, password, name, 25, 70.0, 175.0, null);
+        User registered = service.registerUser(email, password, name, 25, 70.0, 175.0, null, null);
 
         // Assert: Make sure a user was returned and password can be checked correctly
         assertNotNull(registered);  // Ensure registration didn't return null

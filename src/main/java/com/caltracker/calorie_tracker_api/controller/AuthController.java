@@ -29,18 +29,16 @@ public class AuthController {
 	@PostMapping("/register")
 	public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
 	    if (userService.findByEmail(request.getEmail()).isPresent()) {
-	        return ResponseEntity.badRequest().body("User already exists");
+	        return ResponseEntity.badRequest()
+	            .body(Collections.singletonMap("error", "User already exists"));
 	    }
+
 	    User user = userService.registerUser(
 	        request.getEmail(),
 	        request.getPassword(),
-	        request.getName(),
-	        request.getAge(),
-	        request.getWeight(),
-	        request.getHeight(),
-	        request.getGender(),   
-	        request.getGoal()
+	        request.getName()
 	    );
+
 	    String token = jwtUtil.generateToken(user.getEmail());
 	    return ResponseEntity.ok(Collections.singletonMap("token", token));
 	}

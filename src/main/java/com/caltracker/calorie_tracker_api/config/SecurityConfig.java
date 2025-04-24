@@ -18,7 +18,7 @@ public class SecurityConfig {
         this.jwtFilter = jwtFilter;
     }
 
-    // 🔐 Настройка фильтра безопасности и доступа
+    // security and accsess
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -32,7 +32,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // ✅ Бин PasswordEncoder для хеширования и проверки паролей
+    // Bean PasswordEncoder for 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

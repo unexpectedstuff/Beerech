@@ -28,6 +28,21 @@ public class UserService {
 		return userRepository.findByEmail(email);
 	}
 
+	public User registerUser(String email, String rawPassword, String name) {
+	    // Hash the password before saving (for security purposes)
+	    String hashedPassword = passwordEncoder.encode(rawPassword);
+
+	    // Create a new user with email, hashed password, and name
+	    User user = new User(email, hashedPassword, name);
+
+	    // Other profile fields (age, weight, goal, gender, etc.) 
+	    // can be filled in later through profile updates
+
+	    // Save the user to the database
+	    return userRepository.save(user);
+	}
+
+	//override in case we will have signup with complete profile
 	public User registerUser(String email, String rawPassword, String name, Integer age, Double weight, Double height,
 			Gender gender, Goal goal) {
 		// Encode (hash) the password before saving it
