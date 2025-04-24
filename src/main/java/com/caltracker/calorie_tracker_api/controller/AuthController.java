@@ -5,6 +5,9 @@ import com.caltracker.calorie_tracker_api.dto.RegisterRequest;
 import com.caltracker.calorie_tracker_api.entity.User;
 import com.caltracker.calorie_tracker_api.security.JwtUtil;
 import com.caltracker.calorie_tracker_api.service.UserService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,16 +27,22 @@ public class AuthController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-		if (userService.findByEmail(request.getEmail()).isPresent()) {
-			return ResponseEntity.badRequest().body("User already exists");
-		}
-
-		User user = userService.registerUser(request.getEmail(), request.getPassword(), request.getName(),
-				request.getAge(), request.getWeight(), request.getHeight(), request.getGoal());
-
-		String token = jwtUtil.generateToken(user.getEmail());
-		return ResponseEntity.ok(Collections.singletonMap("token", token));
+	public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+	    if (userService.findByEmail(request.getEmail()).isPresent()) {
+	        return ResponseEntity.badRequest().body("User already exists");
+	    }
+	    User user = userService.registerUser(
+	        request.getEmail(),
+	        request.getPassword(),
+	        request.getName(),
+	        request.getAge(),
+	        request.getWeight(),
+	        request.getHeight(),
+	        request.getGender(),   
+	        request.getGoal()
+	    );
+	    String token = jwtUtil.generateToken(user.getEmail());
+	    return ResponseEntity.ok(Collections.singletonMap("token", token));
 	}
 
 	@PostMapping("/login")

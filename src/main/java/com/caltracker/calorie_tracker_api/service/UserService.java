@@ -1,6 +1,7 @@
 package com.caltracker.calorie_tracker_api.service;
 
 import com.caltracker.calorie_tracker_api.dto.UpdateProfileRequest;
+import com.caltracker.calorie_tracker_api.entity.Gender;
 import com.caltracker.calorie_tracker_api.entity.Goal;
 import com.caltracker.calorie_tracker_api.entity.User;
 import com.caltracker.calorie_tracker_api.repository.UserRepository;
@@ -28,7 +29,7 @@ public class UserService {
 	}
 
 	public User registerUser(String email, String rawPassword, String name, Integer age, Double weight, Double height,
-			Goal goal) {
+			Gender gender, Goal goal) {
 		// Encode (hash) the password before saving it
 		String hashedPassword = passwordEncoder.encode(rawPassword);
 
@@ -40,6 +41,7 @@ public class UserService {
 		user.setWeight(weight);
 		user.setHeight(height);
 		user.setGoal(goal);
+		user.setGender(gender);
 
 		// Save the user in the database
 		return userRepository.save(user);
