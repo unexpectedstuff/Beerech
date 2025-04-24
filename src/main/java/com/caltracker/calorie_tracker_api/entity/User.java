@@ -23,8 +23,11 @@ public class User {
     private Integer calorieTarget;
 
 
-    @Enumerated(EnumType.STRING) // лучше STRING, чтобы видеть LOSE_WEIGHT и т.п.
+    @Enumerated(EnumType.STRING) 
     private Goal goal;
+    
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     public User() {}
 
@@ -71,6 +74,11 @@ public class User {
     public Integer getCalorieTarget() {
         return calorieTarget;
     }
+    
+    public Gender getGender() {
+        return gender;
+    }
+
 
 
     // --- Setters ---
@@ -109,6 +117,10 @@ public class User {
     
     public void setCalorieTarget(Integer calorieTarget) {
         this.calorieTarget = calorieTarget;
+    }
+    
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
 }

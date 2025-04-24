@@ -8,6 +8,8 @@ import com.caltracker.calorie_tracker_api.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin
@@ -31,14 +33,23 @@ public class AuthController {
 				request.getAge(), request.getWeight(), request.getHeight(), request.getGoal());
 
 		String token = jwtUtil.generateToken(user.getEmail());
-		return ResponseEntity.ok().body(token);
+		return ResponseEntity.ok(Collections.singletonMap("token", token));
 	}
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 		return userService.findByEmail(request.getEmail())
+				// Check if user exists and password is correct
+				// If not, skip to orElse below
 				.filter(user -> userService.checkPassword(user, request.getPassword()))
-				.map(user -> ResponseEntity.ok().body(jwtUtil.generateToken(user.getEmail())))
-				.orElse(ResponseEntity.status(401).body("Invalid credentials"));
+
+				// If user exists and password is OK → create token and send it back
+				.map(user -> {
+					String token = jwtUtil.generateToken(user.getEmail()); // generate JWT token
+					return ResponseEntity.ok(Collections.singletonMap("token", token)); // return token in response body
+				})
+
+				// If user not found OR password wrong → return 401 Unauthorized
+				.orElse(ResponseEntity.status(401).body(Collections.singletonMap("error", "Invalid credentials")));
 	}
 }
