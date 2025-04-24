@@ -5,6 +5,23 @@ const passwordInput = document.getElementById('regPassword');
 const confirmInput = document.getElementById('confirmPassword');
 const registerButton = document.getElementById('registerButton');
 
+// Function to validate email format
+function validateEmail(email) {
+  return email.includes('@') && email.includes('.');
+}
+
+// Function to validate username (only English letters and digits, minimum length of 3)
+function validateRegLogin(username) {
+  const loginPattern = /^[A-Za-z0-9]{3,}$/; // Only English letters and digits, minimum 3 characters
+  return loginPattern.test(username);
+}
+
+// Function to validate password strength
+function validatePassword(password) {
+  const passwordPattern = /^[A-Za-z0-9]{6,}$/; // Only letters and digits, minimum 6 characters
+  return passwordPattern.test(password);
+}
+
 // Function to enable or disable the register button based on input validation
 function toggleRegisterState() {
   // Check if each field is filled (non-empty after trimming)
@@ -12,15 +29,18 @@ function toggleRegisterState() {
   const isEmailFilled = emailInput.value.trim() !== '';
   const isPasswordFilled = passwordInput.value.trim() !== '';
   const isConfirmFilled = confirmInput.value.trim() !== '';
-  // Check if password and confirmation match
+
+  // Check if email, regLogin, password and confirmation are valid
+  const isEmailValid = validateEmail(emailInput.value.trim());
+  const isRegLoginValid = validateRegLogin(regLoginInput.value.trim());
+  const isPasswordValid = validatePassword(passwordInput.value.trim());
   const passwordsMatch = passwordInput.value === confirmInput.value;
 
-  if (isRegLoginFilled && isEmailFilled && isPasswordFilled && isConfirmFilled && passwordsMatch) {
-    // If all inputs are valid and passwords match, enable the register button
+  // Enable register button only if all inputs are valid and passwords match
+  if (isRegLoginFilled && isEmailFilled && isPasswordFilled && isConfirmFilled && isEmailValid && isRegLoginValid && isPasswordValid && passwordsMatch) {
     registerButton.classList.remove('inactive');
     registerButton.classList.add('active');
   } else {
-    // Otherwise, keep the button inactive
     registerButton.classList.add('inactive');
     registerButton.classList.remove('active');
   }
@@ -53,4 +73,9 @@ registerButton.addEventListener('click', function (e) {
 
   // Store user data in localStorage
   localStorage.setItem("user", JSON.stringify(user));
+
+  // You can also proceed to send data to a backend server here
+  // Example: fetch("/register", { method: "POST", body: JSON.stringify(user) });
+
+  alert("Registration successful!");
 });
