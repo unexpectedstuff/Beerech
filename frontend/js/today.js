@@ -39,6 +39,15 @@ function generateDateCards() {
       card.classList.add("selected");
       localStorage.setItem("selectedDate", card.dataset.date);
       loadMealsForDate(card.dataset.date);
+    
+      const consumedData = getConsumedDataForDate(card.dataset.date);
+      const user = JSON.parse(localStorage.getItem("user")) || {
+        caloriesGoal: 2000,
+        proteinGoal: 150,
+        fatGoal: 70,
+        carbsGoal: 300
+      };
+      updateTotals(consumedData, user);
     });
 
     dateScroll.appendChild(card);
@@ -47,71 +56,65 @@ function generateDateCards() {
 
 // Meals by Date
 function loadMealsForDate(dateStr) {
-    const meals = JSON.parse(localStorage.getItem("mealsByDate") || "{}");
-    const mealsForDate = meals[dateStr] || [];
-  
-    mealContainer.innerHTML = "";
-  
-    if (mealsForDate.length === 0) {
-      mealContainer.innerHTML = "<p>No information about this day</p>";
-      return;
-    }
-  
-    mealsForDate.forEach((meal, index) => {
-      const card = document.createElement("div");
-      card.classList.add("meal-card");
-      card.dataset.index = index;
-      card.innerHTML = `
-        <div class="meal-first">
-          <p class="meal-title">${meal.name}</p>
-          <div class="meal-actions">
-            <img src="images/edit.png" class="icon-btn" title="Edit" onclick="editMeal(${index}, '${dateStr}')" />
-            <img src="images/delete.png" class="icon-btn" title="Delete" onclick="deleteMeal(${index}, '${dateStr}')" />
-          </div>
-        </div>
-        <div class="meal-second">
-          <p class="meal-calories">${meal.calories} kcal</p>
-        </div>
-        <div class="meal-nutrients">
-          <span>Proteins: ${meal.protein}g</span>
-          <span>Fats: ${meal.fat}g</span>
-          <span>Carbs: ${meal.carbs}g</span>
-        </div>
-      `;
-      mealContainer.appendChild(card);
-    });
+  const meals = JSON.parse(localStorage.getItem("mealsByDate") || "{}");
+  const mealsForDate = meals[dateStr] || [];
+
+  mealContainer.innerHTML = "";
+
+  if (mealsForDate.length === 0) {
+    mealContainer.innerHTML = "<p>No information about this day</p>";
+    return;
   }
 
+  mealsForDate.forEach((meal, index) => {
+    const card = document.createElement("div");
+    card.classList.add("meal-card");
+    card.dataset.index = index; // Set the index as dataset attribute for the card
+    card.innerHTML = `
+      <div class="meal-first">
+        <p class="meal-title">${meal.name}</p>
+        <div class="meal-actions">
+          <img src="images/edit.png" class="icon-btn" title="Edit" onclick="editMeal(${index}, '${dateStr}')" />
+          <img src="images/delete.png" class="icon-btn" title="Delete" onclick="deleteMeal(${index}, '${dateStr}')" />
+        </div>
+      </div>
+      <div class="meal-second">
+        <p class="meal-calories">${meal.calories} kcal</p>
+      </div>
+      <div class="meal-nutrients">
+        <span>Proteins: ${meal.protein}g</span>
+        <span>Fats: ${meal.fat}g</span>
+        <span>Carbs: ${meal.carbs}g</span>
+      </div>
+    `;
+    mealContainer.appendChild(card);
+  });
+}
+
 // Edit Meal
-function editMeal(button) {
-    const mealCard = button.closest('.meal-card');
-    
-    if (!mealCard) {
-        console.log('Meal card not found!');
-        return;
-    }
-    
-    const mealTitle = mealCard.querySelector('.meal-title').textContent;
-    const mealCalories = mealCard.querySelector('.meal-calories').textContent;
-    const mealProteins = mealCard.querySelector('.meal-nutrients span:nth-child(1)').textContent.split(': ')[1];
-    const mealFats = mealCard.querySelector('.meal-nutrients span:nth-child(2)').textContent.split(': ')[1];
-    const mealCarbs = mealCard.querySelector('.meal-nutrients span:nth-child(3)').textContent.split(': ')[1];
+function editMeal(index, dateStr) {
+  // Get the selected meal data
+  const meals = JSON.parse(localStorage.getItem("mealsByDate") || "{}");
+  const meal = meals[dateStr][index];
 
-    localStorage.setItem('mealTitle', mealTitle);
-    localStorage.setItem('mealCalories', mealCalories);
-    localStorage.setItem('mealProteins', mealProteins);
-    localStorage.setItem('mealFats', mealFats);
-    localStorage.setItem('mealCarbs', mealCarbs);
+  // Save the current meal data to localStorage for editing
+  localStorage.setItem('editMealIndex', index);
+  localStorage.setItem('mealTitle', meal.name);
+  localStorage.setItem('mealCalories', meal.calories);
+  localStorage.setItem('mealProteins', meal.protein);
+  localStorage.setItem('mealFats', meal.fat);
+  localStorage.setItem('mealCarbs', meal.carbs);
 
-    window.location.href = "mealconstructor.html";
+  // Redirect to the meal constructor page to edit
+  window.location.href = "mealconstructor.html";
 }
 
 // Delete Meal
 function deleteMeal(index, dateStr) {
   const meals = JSON.parse(localStorage.getItem("mealsByDate") || "{}");
-  meals[dateStr].splice(index, 1);
+  meals[dateStr].splice(index, 1); // Remove the meal at the specified index
   localStorage.setItem("mealsByDate", JSON.stringify(meals));
-  loadMealsForDate(dateStr);
+  loadMealsForDate(dateStr); // Reload the meals for the selected date
 }
 
 // Add a meal for the selected date
@@ -125,6 +128,7 @@ document.getElementById("addButton").addEventListener("click", () => {
 function navigateTo(page) {
   const selectedDate = document.querySelector(".date-card.selected")?.dataset.date || formatDate(today);
   localStorage.setItem("selectedDate", selectedDate);
+  localStorage.setItem("mealConstructorMode", "addToToday");
   window.location.href = page;
 }
 
@@ -155,19 +159,37 @@ document.addEventListener("DOMContentLoaded", () => {
     carbsGoal: 300
   };
 
-  const consumedData = {
-    caloriesConsumed: 1200,
-    proteinConsumed: 90,
-    fatConsumed: 50,
-    carbsConsumed: 150
-  };
-
   generateDateCards();
 
   const selectedStoredDate = localStorage.getItem("selectedDate");
   const initialDate = selectedStoredDate || formatDate(today);
+
   loadMealsForDate(initialDate);
 
+  const consumedData = getConsumedDataForDate(initialDate);
   updateTotals(consumedData, user);
 });
 
+function getConsumedDataForDate(dateStr) {
+  const meals = JSON.parse(localStorage.getItem("mealsByDate") || "{}");
+  const mealsForDate = meals[dateStr] || [];
+
+  let caloriesConsumed = 0;
+  let proteinConsumed = 0;
+  let fatConsumed = 0;
+  let carbsConsumed = 0;
+
+  mealsForDate.forEach(meal => {
+    caloriesConsumed += parseFloat(meal.calories) || 0;
+    proteinConsumed += parseFloat(meal.protein) || 0;
+    fatConsumed += parseFloat(meal.fat) || 0;
+    carbsConsumed += parseFloat(meal.carbs) || 0;
+  });
+
+  return {
+    caloriesConsumed,
+    proteinConsumed,
+    fatConsumed,
+    carbsConsumed
+  };
+}
