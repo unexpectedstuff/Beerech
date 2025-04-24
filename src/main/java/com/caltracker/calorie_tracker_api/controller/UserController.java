@@ -43,6 +43,7 @@ public class UserController {
                 currentUser.getAge(),
                 currentUser.getWeight(),
                 currentUser.getHeight(),
+                currentUser.getGender(),
                 currentUser.getGoal(),
                 currentUser.getCalorieTarget()
         ));
