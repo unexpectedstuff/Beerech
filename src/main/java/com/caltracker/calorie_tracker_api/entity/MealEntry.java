@@ -14,11 +14,14 @@ public class MealEntry {
 
     private LocalDate date;
 
-    private String title; // Например "Завтрак", "Обед"
+    private String title; // Like "Breakfast", "Lunch", etc.
 
-    // Пока без пользователя — потом добавим
+    @ManyToOne  // Many MealEntries can belong to one User
+    @JoinColumn(name = "user_id")  // The foreign key column name in the MealEntry table
+    private User user;  // The user who owns this meal entry
 
     @OneToMany(mappedBy = "mealEntry", cascade = CascadeType.ALL, orphanRemoval = true)
+    // I think this means a meal has many products, and if I delete a meal, the products go too??
     private List<MealProduct> products;
 
     public MealEntry() {}
@@ -29,12 +32,13 @@ public class MealEntry {
         this.products = products;
         if (products != null) {
             for (MealProduct mp : products) {
+                // Not sure but I think this links each product back to this meal?
                 mp.setMealEntry(this);
             }
         }
     }
 
-    // Getters & Setters
+    // --- Getters ---
 
     public Long getId() {
         return id;
@@ -52,6 +56,12 @@ public class MealEntry {
         return products;
     }
 
+    public User getUser() {
+        return user;  // Returns the user who created this meal
+    }
+
+    // --- Setters ---
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -68,8 +78,13 @@ public class MealEntry {
         this.products = products;
         if (products != null) {
             for (MealProduct mp : products) {
+                // again, making sure each product knows which meal it's in??
                 mp.setMealEntry(this);
             }
         }
+    }
+
+    public void setUser(User user) {
+        this.user = user;  // Set the user who owns this meal
     }
 }

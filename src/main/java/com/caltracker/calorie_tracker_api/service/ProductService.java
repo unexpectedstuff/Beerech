@@ -1,6 +1,7 @@
 package com.caltracker.calorie_tracker_api.service;
 
 import com.caltracker.calorie_tracker_api.entity.Product;  // We import the Product class to work with Product objects
+import com.caltracker.calorie_tracker_api.entity.User;  // Import the User class so we can filter products by user
 import com.caltracker.calorie_tracker_api.repository.ProductRepository;  // We import the ProductRepository to interact with the database
 import org.springframework.stereotype.Service;  // We import the @Service annotation to mark this class as a service
 
@@ -17,15 +18,32 @@ public class ProductService {
         this.repo = repo;
     }
 
-    // This method gets all products from the database
+    // This method gets all products from the database (not filtered)
     public List<Product> getAll() {
-        // Calls the repo (repository) to get all products and returns them
         return repo.findAll();
     }
 
-    // This method adds a new product to the database
+    // This method adds a new product to the database (not tied to a user)
     public Product add(Product product) {
-        // Calls the repo (repository) to save the new product and returns the saved product
         return repo.save(product);
+    }
+
+    // 🔐 This method returns all products that belong to a specific user
+    public List<Product> getAllForUser(User user) {
+        // We ask the repository to find all products where user = the given user
+        return repo.findAllByUser(user);
+    }
+
+    // 🔐 This method adds a product and links it to the user who created it
+    public Product add(Product product, User user) {
+        // We attach the user to the product before saving
+        product.setUser(user);
+        return repo.save(product);
+    }
+
+    // 🔍 This method searches for products by name, but only for a specific user
+    public List<Product> search(String query, User user) {
+        // Returns products where the name contains the query (case-insensitive) and belongs to the user
+        return repo.findByUserAndNameContainingIgnoreCase(user, query);
     }
 }

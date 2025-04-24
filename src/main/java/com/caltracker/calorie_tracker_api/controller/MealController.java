@@ -1,8 +1,9 @@
 package com.caltracker.calorie_tracker_api.controller;
 
 import com.caltracker.calorie_tracker_api.entity.MealEntry;
-import com.caltracker.calorie_tracker_api.service.MealService;
+import com.caltracker.calorie_tracker_api.service.MealEntryService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -13,9 +14,9 @@ import java.util.List;
 @CrossOrigin
 public class MealController {
 
-    private final MealService mealService;
+    private final MealEntryService mealService;
 
-    public MealController(MealService mealService) {
+    public MealController(MealEntryService mealService) {
         this.mealService = mealService;
     }
 
@@ -25,6 +26,14 @@ public class MealController {
     ) {
         return mealService.getMealsByDate(date);
     }
+    
+    @GetMapping("/{date}/summary")
+    public ResponseEntity<?> getMealSummary(
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return ResponseEntity.ok(mealService.getSummaryForDate(date));
+    }
+
 
     @PostMapping("/{date}/add")
     public MealEntry addMeal(
