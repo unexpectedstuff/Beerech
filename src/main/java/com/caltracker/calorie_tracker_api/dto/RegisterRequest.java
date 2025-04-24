@@ -1,15 +1,38 @@
 package com.caltracker.calorie_tracker_api.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+
 import com.caltracker.calorie_tracker_api.entity.Goal;
 
 public class RegisterRequest {
 
+    @NotBlank
+    @Email
     private String email;
+
+    @NotBlank
+    @Size(min = 6)
     private String password;
+
+    @NotBlank
     private String name;
+
+    @Min(10)
+    @Max(120)
     private Integer age;
+
+    @Min(30)
+    @Max(300)
     private Double weight;
+
+    @Min(100)
+    @Max(250)
     private Double height;
+
     private Goal goal;
 
     public RegisterRequest() {}
@@ -24,8 +47,6 @@ public class RegisterRequest {
         this.height = height;
         this.goal = goal;
     }
-
-    // Getters
 
     public String getEmail() {
         return email;
@@ -54,8 +75,6 @@ public class RegisterRequest {
     public Goal getGoal() {
         return goal;
     }
-
-    // Setters
 
     public void setEmail(String email) {
         this.email = email;

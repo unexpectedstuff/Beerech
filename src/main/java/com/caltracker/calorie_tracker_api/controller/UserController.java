@@ -4,6 +4,8 @@ import com.caltracker.calorie_tracker_api.dto.UpdateProfileRequest;
 import com.caltracker.calorie_tracker_api.dto.UserProfileDTO;
 import com.caltracker.calorie_tracker_api.entity.User;
 import com.caltracker.calorie_tracker_api.service.UserService;
+
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +21,7 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(@RequestBody UpdateProfileRequest request) {
+    public ResponseEntity<?> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         User updated = userService.updateUserProfile(request);
         if (updated == null) {
             return ResponseEntity.status(401).body("Unauthorized");
