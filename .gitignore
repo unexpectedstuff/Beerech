@@ -40,3 +40,7 @@ build/
 # OS / Editor junk
 .DS_Store
 Thumbs.db
+
+# Secret config
+src/main/resources/application-secret.properties
+
