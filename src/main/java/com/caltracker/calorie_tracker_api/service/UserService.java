@@ -1,7 +1,11 @@
 package com.caltracker.calorie_tracker_api.service;
 
+import com.caltracker.calorie_tracker_api.dto.UpdateProfileRequest;
+import com.caltracker.calorie_tracker_api.entity.Goal;
 import com.caltracker.calorie_tracker_api.entity.User;
 import com.caltracker.calorie_tracker_api.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -10,26 +14,71 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
+	}
 
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+	public Optional<User> findByEmail(String email) {
+		// Look up user by email in the database
+		return userRepository.findByEmail(email);
+	}
 
-    public User registerUser(String email, String rawPassword, String name) {
-        String hashedPassword = passwordEncoder.encode(rawPassword);
-        User user = new User(email, hashedPassword, name);
-        return userRepository.save(user);
-    }
+	public User registerUser(String email, String rawPassword, String name, Integer age, Double weight, Double height,
+			Goal goal) {
+		// Encode (hash) the password before saving it
+		String hashedPassword = passwordEncoder.encode(rawPassword);
 
-    public boolean checkPassword(User user, String rawPassword) {
-        return passwordEncoder.matches(rawPassword, user.getPassword());
-    }
+		// Create a new user with basic data
+		User user = new User(email, hashedPassword, name);
+
+		// Set optional fields
+		user.setAge(age);
+		user.setWeight(weight);
+		user.setHeight(height);
+		user.setGoal(goal);
+
+		// Save the user in the database
+		return userRepository.save(user);
+	}
+
+	public boolean checkPassword(User user, String rawPassword) {
+		// Compare raw password with the hashed one stored in the database
+		return passwordEncoder.matches(rawPassword, user.getPassword());
+	}
+
+	public User getCurrentUser() {
+		// Get authentication object from Spring Security context
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+		// If there's no logged-in user or the object is not a User instance, return null
+		if (auth == null || !(auth.getPrincipal() instanceof User)) {
+			return null;
+		}
+
+		// Cast and return the logged-in user
+		return (User) auth.getPrincipal();
+	}
+
+	// ✅ New method to update user's profile info
+	public User updateUserProfile(UpdateProfileRequest request) {
+		User user = getCurrentUser();
+		if (user == null) {
+			// If no one is logged in, return null
+			return null;
+		}
+
+		// Update user's profile data from the request DTO
+		user.setName(request.getName());
+		user.setAge(request.getAge());
+		user.setWeight(request.getWeight());
+		user.setHeight(request.getHeight());
+		user.setGoal(request.getGoal());
+
+		// Save changes to the database
+		return userRepository.save(user);
+	}
 }

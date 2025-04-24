@@ -15,6 +15,10 @@ public class Product {
     private double carbs;  // Carbohydrates content in the product
     private double calories;  // Calorie content in the product
 
+    @ManyToOne  // Many products can belong to one user
+    @JoinColumn(name = "user_id")  // This is the name of the foreign key column in the product table
+    private User user;  // The user who created/owns this product
+
     // No-argument constructor required by JPA for entity classes
     public Product() {
     }
@@ -28,7 +32,7 @@ public class Product {
         this.calories = calories;
     }
 
-    // Getters and Setters for all fields
+    // --- Getters ---
 
     public Long getId() {
         return id;  
@@ -53,7 +57,12 @@ public class Product {
     public double getCalories() {
         return calories; 
     }
-    // Setters for setting values of the fields
+
+    public User getUser() {
+        return user;  // Return the user associated with this product
+    }
+
+    // --- Setters ---
 
     public void setId(Long id) {
         this.id = id;  // Sets the product ID (useful if the ID is manually set, but probably will be auto-generated I DONT KNOW YET OKAY)
@@ -77,5 +86,9 @@ public class Product {
 
     public void setCalories(double calories) {
         this.calories = calories; 
+    }
+
+    public void setUser(User user) {
+        this.user = user;  // Set the user who owns this product (used to link product to a specific user)
     }
 }

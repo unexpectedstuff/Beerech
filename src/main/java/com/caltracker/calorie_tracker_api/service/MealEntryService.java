@@ -1,5 +1,6 @@
 package com.caltracker.calorie_tracker_api.service;
 
+import com.caltracker.calorie_tracker_api.dto.MealSummaryDTO;
 import com.caltracker.calorie_tracker_api.entity.MealEntry;
 import com.caltracker.calorie_tracker_api.entity.MealProduct;
 import com.caltracker.calorie_tracker_api.entity.Product;
@@ -23,7 +24,7 @@ public class MealEntryService {
     }
 
     public MealEntry addMeal(MealEntry entry) {
-        // Устанавливаем обратную связь
+        // Set MealEntry reference in each MealProduct
         if (entry.getProducts() != null) {
             for (MealProduct mp : entry.getProducts()) {
                 mp.setMealEntry(entry);
@@ -39,3 +40,41 @@ public class MealEntryService {
     public double calculateTotalCalories(MealEntry entry) {
         return entry.getProducts().stream()
                 .mapToDouble(mp -> {
+                    Product p = mp.getProduct();
+                    return (p.getCalories() / 100.0) * mp.getAmountInGrams();
+                })
+                .sum();
+    }
+
+    // 🔢 Summarize nutrition for a specific day (all meals)
+    public MealSummaryDTO getSummaryForDate(LocalDate date) {
+        List<MealEntry> meals = getMealsByDate(date);
+
+        double totalCalories = 0;
+        double totalProtein = 0;
+        double totalFat = 0;
+        double totalCarbs = 0;
+
+        // Go through each meal and sum all nutrient values
+        for (MealEntry meal : meals) {
+            for (MealProduct mp : meal.getProducts()) {
+                Product p = mp.getProduct();
+                double grams = mp.getAmountInGrams();
+
+                // Convert per-100g nutritional values to actual by multiplying with grams
+                totalCalories += (p.getCalories() / 100.0) * grams;
+                totalProtein += (p.getProtein() / 100.0) * grams;
+                totalFat     += (p.getFat() / 100.0) * grams;
+                totalCarbs   += (p.getCarbs() / 100.0) * grams;
+            }
+        }
+
+        // Round each result to 1 decimal place and return as DTO
+        return new MealSummaryDTO(
+                Math.round(totalCalories * 10.0) / 10.0,
+                Math.round(totalProtein * 10.0) / 10.0,
+                Math.round(totalFat * 10.0) / 10.0,
+                Math.round(totalCarbs * 10.0) / 10.0
+        );
+    }
+}

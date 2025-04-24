@@ -2,33 +2,39 @@ package com.caltracker.calorie_tracker_api.controller;
 
 import com.caltracker.calorie_tracker_api.entity.Recipe;
 import com.caltracker.calorie_tracker_api.service.RecipeService;
+import com.caltracker.calorie_tracker_api.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/recipes")
-@CrossOrigin
+@CrossOrigin  // Allow frontend requests from another origin (like localhost:3000)
 public class RecipeController {
 
-    private final RecipeService service;
+    private final RecipeService recipeService;
+    private final UserService userService;
 
-    public RecipeController(RecipeService service) {
-        this.service = service;
+    public RecipeController(RecipeService recipeService, UserService userService) {
+        this.recipeService = recipeService;
+        this.userService = userService;
     }
 
+    // 🔓 This method returns only recipes visible to the current user
     @GetMapping
     public List<Recipe> getAll() {
-        return service.getAll();
+        return recipeService.getVisibleToUser(userService.getCurrentUser());
     }
 
+    // 🔍 Get a single recipe by its ID
     @GetMapping("/{id}")
     public Recipe getById(@PathVariable Long id) {
-        return service.getById(id);
+        return recipeService.getById(id);
     }
 
+    // ➕ Add a new recipe (assumes user is already attached in the request body)
     @PostMapping("/add")
     public Recipe add(@RequestBody Recipe recipe) {
-        return service.add(recipe);
+        return recipeService.add(recipe);
     }
 }

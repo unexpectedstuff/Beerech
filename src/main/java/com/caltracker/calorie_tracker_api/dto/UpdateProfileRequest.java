@@ -2,38 +2,14 @@ package com.caltracker.calorie_tracker_api.dto;
 
 import com.caltracker.calorie_tracker_api.entity.Goal;
 
-public class RegisterRequest {
-
-    private String email;
-    private String password;
+public class UpdateProfileRequest {
     private String name;
     private Integer age;
     private Double weight;
     private Double height;
     private Goal goal;
 
-    public RegisterRequest() {}
-
-    public RegisterRequest(String email, String password, String name,
-                           Integer age, Double weight, Double height, Goal goal) {
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.age = age;
-        this.weight = weight;
-        this.height = height;
-        this.goal = goal;
-    }
-
-    // Getters
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
+    public UpdateProfileRequest() {}
 
     public String getName() {
         return name;
@@ -53,16 +29,6 @@ public class RegisterRequest {
 
     public Goal getGoal() {
         return goal;
-    }
-
-    // Setters
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public void setName(String name) {
