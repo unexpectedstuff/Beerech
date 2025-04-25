@@ -213,7 +213,7 @@ Delete a specific meal template.
 
 ---
 
-## 🛒 Products
+## Products
 
 ### GET `/products`
 
