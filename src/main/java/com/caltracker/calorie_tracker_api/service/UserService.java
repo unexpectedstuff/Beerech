@@ -104,11 +104,14 @@ public class UserService {
 		user.setWeight(request.getWeight());
 		user.setHeight(request.getHeight());
 		user.setGoal(request.getGoal());
+		user.setGender(request.getGender());
 
 
 	    // debug before save
 	    System.out.println("⬇️ Final user entity before saving:");
 	    System.out.println("Gender in User: " + user.getGender());
+	    System.out.println("Goal in User: " + user.getGoal());
+	    
 		
 		// Save changes to the database
 		return userRepository.save(user);
