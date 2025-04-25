@@ -1,103 +1,130 @@
-// Wait until the entire DOM is fully loaded
 document.addEventListener("DOMContentLoaded", function () {
-    // Get all gender selection buttons and the hidden input to store selected gender
-    const genderButtons = document.querySelectorAll(".gender-btn");
-    const genderInput = document.getElementById("gender");
-  
-    // Add change event listeners to each gender button
-    genderButtons.forEach(button => {
-        button.addEventListener("change", function () {
-            // When a gender is selected, update the hidden input and validate the form
-            genderInput.value = this.value;
-            validateForm();
-        });
-    });
-  
-    // Function to validate the form and toggle the Continue button's state
-    function validateForm() {
-        const ageInput = document.getElementById("age");
-        const heightInput = document.getElementById("height");
-        const weightInput = document.getElementById("weight");
-        const activitySelect = document.getElementById("activity");
-        const continueButton = document.getElementById("continueButton");
-  
-        // Check if all fields have values (not empty)
-        const isFormValid =
-            ageInput.value.trim() !== "" &&
-            genderInput.value.trim() !== "" &&
-            heightInput.value.trim() !== "" &&
-            weightInput.value.trim() !== "" &&
-            activitySelect.value.trim() !== "" &&
-            isAgeValid(ageInput.value) &&
-            isHeightValid(heightInput.value) &&
-            isWeightValid(weightInput.value);
-  
-        // Enable or disable the Continue button based on validation
-        continueButton.classList.toggle("inactive", !isFormValid);
-        continueButton.classList.toggle("active", isFormValid);
-    }
-  
-    // Validate age (must be between 18 and 120)
-    function isAgeValid(age) {
-      const ageNum = parseInt(age, 10);
-      return ageNum >= 18 && ageNum <= 120;
-    }
-  
-    // Validate height (must be between 100 cm and 250 cm)
-    function isHeightValid(height) {
-      const heightNum = parseInt(height, 10);
-      return heightNum >= 100 && heightNum <= 250;
-    }
-  
-    // Validate weight (must be between 30 kg and 300 kg)
-    function isWeightValid(weight) {
-      const weightNum = parseInt(weight, 10);
-      return weightNum >= 30 && weightNum <= 300;
-    }
-  
-    // Collect input elements for live validation
-    const inputs = [
-        document.getElementById("age"),
-        document.getElementById("height"),
-        document.getElementById("weight"),
-        document.getElementById("activity"),
-        genderInput
-    ];
-  
-    // Attach validation listener to all relevant fields
-    inputs.forEach(input => {
-        input.addEventListener("input", validateForm);
-    });
-  });
-  
-  // Handle click on the Continue button
+  const genderButtons = document.querySelectorAll(".gender-btn");
   const continueButton = document.getElementById("continueButton");
-  continueButton.addEventListener("click", function (e) {
-    // Prevent proceeding if the form is invalid
-    if (this.classList.contains("inactive")) {
-        e.preventDefault();
-    } else {
-        // Collect input values
-        const age = document.getElementById("age").value;
-        const height = document.getElementById("height").value;
-        const weight = document.getElementById("weight").value;
-        const gender = document.getElementById("gender").value;
-        const activity = document.getElementById("activity").value;
-  
-        // Retrieve existing user data from localStorage, or create a new object
-        const user = JSON.parse(localStorage.getItem("user")) || {};
-  
-        // Add the collected info to the user object
-        user.age = age;
-        user.height = height;
-        user.weight = weight;
-        user.gender = gender;
-        user.activity = activity;
-  
-        // Save updated user data back to localStorage
-        localStorage.setItem("user", JSON.stringify(user));
-  
-        // Log confirmation to the console (for development/debugging)
-        console.log("User data saved to localStorage");
-    }
+
+  const ageInput = document.getElementById("age");
+  const heightInput = document.getElementById("height");
+  const weightInput = document.getElementById("weight");
+  const activitySelect = document.getElementById("activity");
+
+  let user = {}; // сюда загрузим текущий профиль
+
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  fetch("http://localhost:8080/user/profile", {
+    headers: { "Authorization": "Bearer " + token }
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to load user profile");
+      return res.json();
+    })
+    .then(data => {
+      user = data;
+
+      if (data.age) ageInput.value = data.age;
+      if (data.height) heightInput.value = data.height;
+      if (data.weight) weightInput.value = data.weight;
+      if (data.gender) {
+        const btn = document.getElementById(data.gender.toLowerCase());
+        if (btn) btn.checked = true;
+      }
+
+      validateForm();
+    })
+    .catch(err => {
+      console.error("Error loading user data:", err);
+      window.location.href = "login.html";
+    });
+
+  genderButtons.forEach(button => {
+    button.addEventListener("change", validateForm);
   });
+
+  function getSelectedGender() {
+    const selected = document.querySelector('input[name="gender"]:checked');
+    return selected ? selected.value.toUpperCase() : null;
+  }
+
+  function validateForm() {
+    const gender = getSelectedGender();
+
+    const isFormValid =
+      ageInput.value.trim() &&
+      gender &&
+      heightInput.value.trim() &&
+      weightInput.value.trim() &&
+      activitySelect.value.trim() &&
+      isAgeValid(ageInput.value) &&
+      isHeightValid(heightInput.value) &&
+      isWeightValid(weightInput.value);
+
+    continueButton.classList.toggle("inactive", !isFormValid);
+    continueButton.classList.toggle("active", isFormValid);
+  }
+
+  function isAgeValid(age) {
+    const a = parseInt(age, 10);
+    return a >= 18 && a <= 120;
+  }
+
+  function isHeightValid(height) {
+    const h = parseInt(height, 10);
+    return h >= 100 && h <= 250;
+  }
+
+  function isWeightValid(weight) {
+    const w = parseInt(weight, 10);
+    return w >= 30 && w <= 300;
+  }
+
+  [ageInput, heightInput, weightInput, activitySelect].forEach(input =>
+    input.addEventListener("input", validateForm)
+  );
+
+  continueButton.addEventListener("click", function (e) {
+    if (this.classList.contains("inactive")) {
+      e.preventDefault();
+      return;
+    }
+
+    const gender = getSelectedGender() || "OTHER";
+
+    const age = parseInt(ageInput.value);
+    const height = parseFloat(heightInput.value);
+    const weight = parseFloat(weightInput.value);
+    const activity = parseFloat(activitySelect.value);
+
+    const updatedUser = {
+      name: user.name || "Anonymous",
+      email: user.email || "missing@example.com",
+      goal: user.goal || "MAINTAIN_WEIGHT",
+      age,
+      height,
+      weight,
+      gender,
+      calorieTarget: Math.round(
+        (10 * weight + 6.25 * height - 5 * age + (gender === "MALE" ? 5 : -161)) * activity
+      )
+    };
+
+    fetch("http://localhost:8080/user/profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(updatedUser)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to update profile");
+        window.location.href = "goal.html";
+      })
+      .catch(err => {
+        console.error("Error updating profile:", err);
+      });
+  });
+});

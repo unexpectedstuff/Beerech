@@ -1,36 +1,54 @@
-// Wait until the DOM is fully loaded
 document.addEventListener("DOMContentLoaded", () => {
-  // Retrieve user data from localStorage, or use an empty object if not found
-  const user = JSON.parse(localStorage.getItem("user")) || {};
-
-  // Display the user's username and email in the profile section
-  document.getElementById("username").textContent = user.username || "No username";
-  document.getElementById("email").textContent = user.email || "No email";
-
-  // Set the profile avatar image based on user's gender
-  const avatar = document.getElementById("user-avatar");
-  if (user.gender === "female") {
-      avatar.src = "images/femaleAccount.png";
-  } else if (user.gender === "male") {
-      avatar.src = "images/maleAccount.png";
-  } else {
-      avatar.src = "images/defaultAvatar.png"; // Fallback if gender is not specified
+  const token = localStorage.getItem("token");
+  if (!token) {
+    window.location.href = "login.html";
+    return;
   }
+
+  fetch("http://localhost:8080/user/profile", {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Unauthorized");
+      return res.json();
+    })
+    .then(user => {
+      // Заполнение всех доступных полей
+      document.getElementById("username").textContent = user.name || "No name";
+      document.getElementById("email").textContent = user.email || "No email";
+      document.getElementById("age").textContent = user.age !== null ? `Age: ${user.age}` : "Age: -";
+      document.getElementById("weight").textContent = user.weight !== null ? `Weight: ${user.weight} kg` : "Weight: -";
+      document.getElementById("height").textContent = user.height !== null ? `Height: ${user.height} cm` : "Height: -";
+      document.getElementById("gender").textContent = user.gender ? `Gender: ${user.gender.toLowerCase()}` : "Gender: -";
+      document.getElementById("goal").textContent = user.goal ? `Goal: ${user.goal.toLowerCase().replace('_', ' ')}` : "Goal: -";
+      document.getElementById("calorieTarget").textContent = user.calorieTarget !== null ? `Calories/day: ${user.calorieTarget}` : "Calories/day: -";
+
+      // Аватар
+      const avatar = document.getElementById("user-avatar");
+      if (user.gender === "FEMALE") {
+        avatar.src = "images/femaleAccount.png";
+      } else if (user.gender === "MALE") {
+        avatar.src = "images/maleAccount.png";
+      } else {
+        avatar.src = "images/defaultAvatar.png";
+      }
+    })
+    .catch(err => {
+      console.error("Failed to fetch profile", err);
+      localStorage.removeItem("token");
+      // window.location.href = "login.html";
+    });
 });
 
-// Function to navigate to a different page
 function navigateTo(page) {
   window.location.href = page;
 }
 
-// Function to confirm logout action
 function confirmLogout() {
-  const confirmed = confirm("Are you sure you want to log out?");
-  if (confirmed) {
-      // Clear all user data from localStorage
-      localStorage.clear();
-      // Redirect to the login page
-      window.location.href = "1index.html";
+  if (confirm("Are you sure you want to log out?")) {
+    // localStorage.clear();
+    window.location.href = "login.html";
   }
 }
-

@@ -1,26 +1,54 @@
-// Get references to the login input, password input, and the enter button elements
 const loginInput = document.getElementById('login');
 const passwordInput = document.getElementById('password');
 const enterButton = document.getElementById('enterButton');
+const errorBox = document.getElementById('error-message'); // элемент для вывода ошибок
 
-// Function to toggle the button's active/inactive state
 function toggleLinkState() {
-  
-  // Check if both login and password fields are filled (non-empty after trimming)
   const loginFilled = loginInput.value.trim() !== '';
   const passwordFilled = passwordInput.value.trim() !== '';
 
   if (loginFilled && passwordFilled) {
-    // Enable the button by applying the 'active' class and removing 'inactive'
     enterButton.classList.remove('inactive');
     enterButton.classList.add('active');
+    enterButton.disabled = false;
   } else {
-    // Disable the button by applying the 'inactive' class and removing 'active'
     enterButton.classList.add('inactive');
     enterButton.classList.remove('active');
+    enterButton.disabled = true;
   }
 }
 
-// Add event listeners to the input fields to check their content on each keystroke
 loginInput.addEventListener('input', toggleLinkState);
 passwordInput.addEventListener('input', toggleLinkState);
+
+// Отправка запроса при клике
+enterButton.addEventListener('click', function () {
+  const email = loginInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  fetch('http://localhost:8080/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  })
+    .then(res => {
+      if (!res.ok) {
+        throw new Error("Login failed");
+      }
+      return res.json();
+    })
+    .then(data => {
+      localStorage.setItem("token", data.token);
+      window.location.href = 'profile.html';
+    })
+    .catch(err => {
+      if (errorBox) {
+        errorBox.textContent = 'Login failed. Please check your credentials.';
+        errorBox.style.display = 'block';
+      } else {
+        alert("Login failed.");
+      }
+    });
+});

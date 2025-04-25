@@ -134,10 +134,14 @@ body {
   padding: 14px 65px;
   font-size: 40px;
   font-weight: 800;
-  text-align: right;
-  position: relative;
-  top: -100px;
+  text-align: center;
+  background-color: #ADCC22;
+  border: none;
+  border-radius: 20px;
+  margin: 20px auto;
+  display: block;
 }
+
 
 .enterButton.inactive {
   pointer-events: none;
@@ -175,13 +179,17 @@ body {
 .registerButton {
   text-decoration: none;
   color: #FAFEE4;
-  padding: 10px 65px;
-  font-size: 30px;
+  padding: 14px 65px;
+  font-size: 32px;
   font-weight: 800;
-  text-align: right;
-  position: relative;
-  top: -40px;
+  text-align: center;
+  background-color: #ADCC22;
+  border: none;
+  border-radius: 20px;
+  margin: 20px auto;
+  display: block;
 }
+
 
 .registerButton.inactive {
   pointer-events: none;
