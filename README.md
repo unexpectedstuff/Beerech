@@ -244,18 +244,18 @@ Add a new product.
 
 ---
 
-## Barcode Scanning
+<!-- ## Barcode Scanning
 
 ### POST `/barcode/scan`
 
-Look up a product by barcode.
+Look up a product by barcode. -->
 
-**Request:**
+<!-- **Request:**
 ```json
 {
   "barcode": "1234567890123"
 }
-```
+``` -->
 
 ---
 
