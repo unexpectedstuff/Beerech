@@ -275,6 +275,132 @@ Set JWT token in the header:
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...
 ```
 
+# 🥦 Calorie Tracker — Frontend
+
+This is a static frontend for a calorie and nutrition tracking app. It works together with the backend on Spring Boot.
+Features
+
+The app is designed for mobile-first experience and contains the following screens:
+
+## 1. Login and Registration
+    
+    Users log in or register using their email and password.
+    
+    Basic validation and token storage in localStorage.
+
+    
+
+    
+## 2. Profile (profile.html)
+    
+    Displays user information: name, email, gender, age, height, weight, goal, and calorie target.
+    
+    The avatar is selected based on gender.
+    
+    Options:
+    
+    ```
+     View daily report
+    
+     View future plans
+    
+     Check personal nutrition target
+    
+     View recipes
+    
+     Log out
+    
+    ```
+
+![Profile Screen](images/profile.png)
+    
+## 3. Tell me about yourself (info.html)
+    
+    User fills in age, gender, height, weight, and activity level.
+    
+    The data is sent to the backend to update the profile.
+    
+    This step is required for calorie target calculation.
+![Profile Screen](images/profile.png)
+
+    
+## 4. Set goal (goal.html)
+    
+    User selects a goal:
+    
+    ```
+     Lose weight
+    
+     Gain weight
+    
+     Maintain weight
+    
+    ```
+    
+    This updates the profile and recalculates daily needs.
+    
+![Goal](images/target.png)
+5. Daily target (target.html)
+    
+    Based on user data, the backend calculates:
+    
+    ```
+     Total daily calories
+    
+     Macronutrients: protein, fat, and carbs
+    
+    ```
+    
+    Displayed in a styled UI with values and grams.
+    
+6. Today’s Meals (today.html)
+    
+    Displays meals for the current day (e.g., breakfast, lunch, dinner).
+    
+    Each meal shows:
+    
+    ```
+     Calories
+    
+     Macronutrient breakdown
+    
+    ```
+    
+    Meals can be edited or deleted.
+    
+    Button to add a new meal.
+    
+7. Recipe constructor (addmeal.html)
+    
+    User can create a meal by selecting ingredients and specifying amounts.
+    
+    Automatically calculates total nutrition per meal and per 100g.
+    
+    User can save the meal to personal recipes.
+    
+8. My Recipes (myrecipes.html)
+    
+    Displays a list of previously saved recipes.
+    
+    Recipes show kcal and macros.
+    
+    Recipes can be edited or deleted.
+    
+9. My Plans (plans.html)
+    
+    User can create meal plans.
+    
+    Each plan is a group of meals with total nutrition.
+    
+    Editable and deletable.
+
+
+
+
+
+
+
+
 ---
 
 ## License
