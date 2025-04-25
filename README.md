@@ -312,7 +312,7 @@ The app is designed for mobile-first experience and contains the following scree
     
     ```
 
-![Profile Screen](images/profile.png)
+![Profile Screen](images/profile.jpg)
     
 ## 3. Tell me about yourself (info.html)
     
@@ -321,7 +321,7 @@ The app is designed for mobile-first experience and contains the following scree
     The data is sent to the backend to update the profile.
     
     This step is required for calorie target calculation.
-![Profile Screen](images/profile.png)
+![Profile Screen](images/profile.jpg)
 
     
 ## 4. Set goal (goal.html)
@@ -338,8 +338,10 @@ The app is designed for mobile-first experience and contains the following scree
     ```
     
     This updates the profile and recalculates daily needs.
+
+![Profile Screen](images/profile.jpg)
     
-![Goal](images/target.png)
+
 5. Daily target (target.html)
     
     Based on user data, the backend calculates:
@@ -352,6 +354,8 @@ The app is designed for mobile-first experience and contains the following scree
     ```
     
     Displayed in a styled UI with values and grams.
+
+![Target](images/target.png)
     
 6. Today’s Meals (today.html)
     
@@ -369,6 +373,8 @@ The app is designed for mobile-first experience and contains the following scree
     Meals can be edited or deleted.
     
     Button to add a new meal.
+
+![Main](images/main.jpg)
     
 7. Recipe constructor (addmeal.html)
     
@@ -377,6 +383,8 @@ The app is designed for mobile-first experience and contains the following scree
     Automatically calculates total nutrition per meal and per 100g.
     
     User can save the meal to personal recipes.
+
+![Target](images/meal.jpg)
     
 8. My Recipes (myrecipes.html)
     
@@ -385,6 +393,8 @@ The app is designed for mobile-first experience and contains the following scree
     Recipes show kcal and macros.
     
     Recipes can be edited or deleted.
+
+![Recipes](images/recipes.jpg)
     
 9. My Plans (plans.html)
     
@@ -393,6 +403,8 @@ The app is designed for mobile-first experience and contains the following scree
     Each plan is a group of meals with total nutrition.
     
     Editable and deletable.
+
+![plans](images/plans.jpg)
 
 
 
