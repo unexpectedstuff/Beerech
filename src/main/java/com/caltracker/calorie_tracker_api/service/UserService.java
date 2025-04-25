@@ -88,6 +88,16 @@ public class UserService {
 			return null;
 		}
 
+
+	    // debug - delete this
+	    System.out.println("⬇️ Incoming profile update request:");
+	    System.out.println("Name: " + request.getName());
+	    System.out.println("Gender: " + request.getGender());
+	    System.out.println("Goal: " + request.getGoal());
+	    System.out.println("Age: " + request.getAge());
+	    System.out.println("Weight: " + request.getWeight());
+	    System.out.println("Height: " + request.getHeight());
+		
 		// Update user's profile data from the request DTO
 		user.setName(request.getName());
 		user.setAge(request.getAge());
@@ -95,6 +105,11 @@ public class UserService {
 		user.setHeight(request.getHeight());
 		user.setGoal(request.getGoal());
 
+
+	    // debug before save
+	    System.out.println("⬇️ Final user entity before saving:");
+	    System.out.println("Gender in User: " + user.getGender());
+		
 		// Save changes to the database
 		return userRepository.save(user);
 	}
