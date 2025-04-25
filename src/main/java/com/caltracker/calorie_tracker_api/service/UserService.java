@@ -105,6 +105,7 @@ public class UserService {
 		user.setHeight(request.getHeight());
 		user.setGoal(request.getGoal());
 		user.setGender(request.getGender());
+		user.setCalorieTarget(request.getCalorieTarget());
 
 
 	    // debug before save

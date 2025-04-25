@@ -20,6 +20,8 @@ public class User {
     private Double height;
     private Integer age;
     private Double weight;
+
+    @Column(nullable = true) //for testing purposes, but may be needed
     private Integer calorieTarget;
 
 
