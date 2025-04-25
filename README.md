@@ -1,96 +1,282 @@
-# Untitled
-
 # Calorie Tracker API
 
-This is a backend API for a calorie tracking app.
-
-It is made with Java, Spring Boot, and uses PostgreSQL for the database.
-
-Users can register, log in, and keep track of their meals, calories, and nutrition.
-
-Each user only sees their own data.
+This is a Spring Boot based RESTful API for a calorie tracking application. It supports user authentication, meal and product tracking, and nutrition goal setting.
 
 ---
 
-## Features
-
-- User registration and login (with JWT token)
-- Add meals with products and nutrition info
-- Create recipes (a mix of products)
-- Save meal templates to reuse later
-- View daily nutrition summary
-- Set your calorie goal
-- Public recipes (shared with everyone)
-
----
-
-## Tech Stack
+## Technologies Used
 
 - Java 21
 - Spring Boot 3
+- Spring Security with JWT
 - PostgreSQL
-- JWT (JSON Web Token) for authentication
-- Maven for project build
+- Maven
 
 ---
 
-## How to run
+## Getting Started
 
-1. Make sure you have Java 21 and PostgreSQL installed
-2. Clone the project:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/calorie-tracker-api.git
+   ```
 
-git clone [https://github.com/your-username/calorie-tracker-api.git](https://github.com/your-username/calorie-tracker-api.git)
+2. Configure `application.properties`:
+   ```
+   spring.datasource.url=jdbc:postgresql://localhost:5432/caloriedb
+   spring.datasource.username=youruser
+   spring.datasource.password=yourpass
+   jwt.secret=your_jwt_secret
+   ```
 
-1. Create a PostgreSQL database, for example:
-
-CREATE DATABASE calorie_tracker;
-
-1. Set up `application-secret.properties` file (in `src/main/resources`):
-
-DB_USER=your_db_user DB_PASSWORD=your_db_password JWT_SECRET=your_super_secret_key
-
-1. Start the app (for example in your IDE or using Maven):
-
-mvn spring-boot:run
-
-The app will run on `http://localhost:8080`
+3. Run the app:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
 
 ---
 
-## Example API Endpoints
+## Authentication
 
-### Auth
+### POST `/auth/register`
 
-POST /auth/register POST /auth/login GET /user/profile PUT /user/profile
+Register a new user.
 
-### Products
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123",
+  "name": "John Doe"
+}
+```
 
-GET /products POST /products/add
+**Response:**
+```json
+{
+  "token": "eyJhbGci..."
+}
+```
 
-### Meals
+---
 
-GET /meals/2025-04-24 POST /meals/2025-04-24/add GET /meals/2025-04-24/summary
+### POST `/auth/login`
 
-### Recipes
+Authenticate user and return JWT token.
 
-GET /recipes POST /recipes/add
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "eyJhbGci..."
+}
+```
+
+---
+
+## User Profile
+
+### GET `/user/profile`
+
+Get the current user's profile. Requires JWT token.
+
+**Headers:**
+```
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "name": "John Doe",
+  "age": 30,
+  "weight": 75.5,
+  "height": 180,
+  "gender": "MALE",
+  "goal": "MAINTAIN",
+  "calorieTarget": 2200
+}
+```
+
+---
+
+### PUT `/user/profile`
+
+Update the current user's profile.
+
+**Request:**
+```json
+{
+  "age": 30,
+  "weight": 75.5,
+  "height": 180,
+  "gender": "MALE",
+  "goal": "MAINTAIN",
+  "calorieTarget": 2200
+}
+```
+
+---
+
+## Meals
+
+### GET `/meals/{date}`
+
+Retrieve meals for a specific date.
+
+**Example:**
+```
+GET /meals/2024-12-30
+```
+
+---
+
+### POST `/meals/{date}/add`
+
+Add a meal entry to a specific date.
+
+**Request:**
+```json
+{
+  "name": "Lunch",
+  "products": [
+    { "productId": 1, "amount": 150 },
+    { "productId": 2, "amount": 200 }
+  ]
+}
+```
+
+---
+
+### GET `/meals/recent`
+
+Retrieve the user's most recently added meals.
+
+---
+
+### POST `/meals/{date}/apply-template`
+
+Apply a saved meal template to a selected date.
+
+**Request:**
+```json
+{
+  "templateId": 1
+}
+```
+
+---
+
+## Meal Templates
+
+### POST `/meal-templates/save`
+
+Save a new meal template.
+
+**Request:**
+```json
+{
+  "name": "Standard Breakfast",
+  "mealEntries": [
+    { "productId": 3, "amount": 100 },
+    { "productId": 4, "amount": 50 }
+  ]
+}
+```
+
+---
+
+### GET `/meal-templates`
+
+Get all meal templates.
+
+---
+
+### GET `/meal-templates/{template_id}`
+
+Get details for a specific template.
+
+---
+
+### DELETE `/meal-templates/{template_id}`
+
+Delete a specific meal template.
+
+---
+
+## 🛒 Products
+
+### GET `/products`
+
+List all available products.
+
+---
+
+### GET `/products/{product_id}`
+
+Get details for a specific product.
+
+---
+
+### POST `/products/add`
+
+Add a new product.
+
+**Request:**
+```json
+{
+  "name": "Greek Yogurt",
+  "calories": 60,
+  "protein": 10,
+  "fat": 0.4,
+  "carbs": 3.6
+}
+```
+
+---
+
+## Barcode Scanning
+
+### POST `/barcode/scan`
+
+Look up a product by barcode.
+
+**Request:**
+```json
+{
+  "barcode": "1234567890123"
+}
+```
 
 ---
 
 ## Notes
 
-- You need to include the JWT token in all requests after login
-Example header:
-
-Authorization: Bearer your_jwt_token
-
-- Each user has their own meals, recipes, and products
-- Public recipes are shared between users
+- All secured endpoints require a valid JWT in the `Authorization` header.
+- Static frontend is assumed to interact with this API.
+- Some features like CSV export or analytics are planned for future versions.
 
 ---
 
-## Status
+## Sample Token Use in Postman
 
-This is a basic version and still in development.
+Set JWT token in the header:
 
-Pull requests and suggestions are welcome.
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...
+```
+
+---
+
+## License
+
+MIT License – free to use and modify.
