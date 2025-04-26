@@ -96,4 +96,6 @@ public class MealEntryService {
         mealRepo.deleteById(id);
     }
 
+    
+
 }
