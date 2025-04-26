@@ -91,4 +91,9 @@ public class MealEntryService {
                 Math.round(totalCarbs * 10.0) / 10.0
         );
     }
+    
+    public void deleteMeal(Long id) {
+        mealRepo.deleteById(id);
+    }
+
 }

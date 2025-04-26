@@ -60,4 +60,11 @@ public class MealController {
                 .map(MealEntrySimpleDTO::fromMealEntry)
                 .collect(Collectors.toList());
     }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMeal(@PathVariable Long id) {
+        mealService.deleteMeal(id);
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
 }
