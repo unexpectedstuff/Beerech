@@ -1,6 +1,7 @@
 package com.caltracker.calorie_tracker_api.service;
 
 import com.caltracker.calorie_tracker_api.dto.UpdateProfileRequest;
+import com.caltracker.calorie_tracker_api.entity.ActivityLevel;
 import com.caltracker.calorie_tracker_api.entity.Gender;
 import com.caltracker.calorie_tracker_api.entity.Goal;
 import com.caltracker.calorie_tracker_api.entity.User;
@@ -44,7 +45,7 @@ public class UserService {
 
 	//override in case we will have signup with complete profile
 	public User registerUser(String email, String rawPassword, String name, Integer age, Double weight, Double height,
-			Gender gender, Goal goal) {
+			Gender gender, Goal goal, ActivityLevel activityLevel) {
 		// Encode (hash) the password before saving it
 		String hashedPassword = passwordEncoder.encode(rawPassword);
 
@@ -57,6 +58,7 @@ public class UserService {
 		user.setHeight(height);
 		user.setGoal(goal);
 		user.setGender(gender);
+		user.setActivityLevel(activityLevel);
 
 		// Save the user in the database
 		return userRepository.save(user);
@@ -97,6 +99,8 @@ public class UserService {
 	    System.out.println("Age: " + request.getAge());
 	    System.out.println("Weight: " + request.getWeight());
 	    System.out.println("Height: " + request.getHeight());
+	    System.out.println("Calorie target: " + request.getCalorieTarget());
+	    System.out.println("Activity Level: " + request.getActivityLevel());
 		
 		// Update user's profile data from the request DTO
 		user.setName(request.getName());
@@ -106,12 +110,15 @@ public class UserService {
 		user.setGoal(request.getGoal());
 		user.setGender(request.getGender());
 		user.setCalorieTarget(request.getCalorieTarget());
+		user.setActivityLevel(request.getActivityLevel());
 
 
 	    // debug before save
 	    System.out.println("⬇️ Final user entity before saving:");
 	    System.out.println("Gender in User: " + user.getGender());
 	    System.out.println("Goal in User: " + user.getGoal());
+	    System.out.println("Activity Level in User: " + user.getActivityLevel());
+
 	    
 		
 		// Save changes to the database

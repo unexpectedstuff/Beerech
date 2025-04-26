@@ -30,6 +30,10 @@ public class User {
     
     @Enumerated(EnumType.STRING)
     private Gender gender;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private ActivityLevel activityLevel;
 
     public User() {}
 
@@ -80,8 +84,10 @@ public class User {
     public Gender getGender() {
         return gender;
     }
-
-
+    
+    public ActivityLevel getActivityLevel() {
+        return activityLevel;
+    }
 
     // --- Setters ---
 
@@ -123,6 +129,10 @@ public class User {
     
     public void setGender(Gender gender) {
         this.gender = gender;
+    }
+    
+    public void setActivityLevel(ActivityLevel activityLevel) {
+        this.activityLevel = activityLevel;
     }
 
 }

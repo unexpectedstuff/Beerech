@@ -45,7 +45,8 @@ public class UserController {
                 currentUser.getHeight(),
                 currentUser.getGender(),
                 currentUser.getGoal(),
-                currentUser.getCalorieTarget()
+                currentUser.getCalorieTarget(),
+                currentUser.getActivityLevel()
         ));
     }
 }
