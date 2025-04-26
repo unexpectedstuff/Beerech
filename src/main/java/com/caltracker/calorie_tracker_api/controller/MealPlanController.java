@@ -2,6 +2,7 @@ package com.caltracker.calorie_tracker_api.controller;
 
 import com.caltracker.calorie_tracker_api.dto.MealPlanSimpleDTO;
 import com.caltracker.calorie_tracker_api.entity.MealPlan;
+import com.caltracker.calorie_tracker_api.entity.MealProduct;
 import com.caltracker.calorie_tracker_api.entity.MealEntry;
 import com.caltracker.calorie_tracker_api.service.MealEntryService;
 import com.caltracker.calorie_tracker_api.service.MealPlanService;
