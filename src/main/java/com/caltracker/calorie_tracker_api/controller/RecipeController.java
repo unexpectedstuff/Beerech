@@ -50,4 +50,10 @@ public class RecipeController {
         // Otherwise, return the recipe
         return ResponseEntity.ok(RecipeSimpleDTO.fromRecipe(recipe));
     }
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
+        recipeService.deleteRecipe(id);
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
 }

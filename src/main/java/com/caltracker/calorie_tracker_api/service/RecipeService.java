@@ -59,4 +59,10 @@ public class RecipeService {
     public List<Recipe> getVisibleToUser(User user) {
         return repo.findVisibleToUser(user);
     }
+    
+    // delete recipe by id
+    public void deleteRecipe(Long id) {
+        repo.deleteById(id);
+    }
+
 }
