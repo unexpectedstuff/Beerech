@@ -6,6 +6,8 @@ import com.caltracker.calorie_tracker_api.entity.RecipeProduct;
 import com.caltracker.calorie_tracker_api.entity.User;
 import com.caltracker.calorie_tracker_api.repository.ProductRepository;
 import com.caltracker.calorie_tracker_api.repository.RecipeRepository;
+
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,23 +31,20 @@ public class RecipeService {
                 if (product != null && product.getId() == null) {
                     // If the product is new (no ID yet), save it first to the database
                     Product savedProduct = productRepository.save(product);
-                    // Now set the saved product (with ID) back to the recipe product
                     rp.setProduct(savedProduct);
                 }
-                // Set the recipe reference inside the recipe product
                 rp.setRecipe(recipe);
             }
         }
-        // Finally, save the recipe itself (with all linked products)
         return repo.save(recipe);
     }
 
-    // Return all recipes in the database (admin/debug only?)
+    // Return all recipes in the database
     public List<Recipe> getAll() {
         return repo.findAll();
     }
 
-    // Find one recipe by ID or return null if not found
+    // Find one recipe by ID
     public Recipe getById(Long id) {
         return repo.findById(id).orElse(null);
     }
@@ -60,9 +59,36 @@ public class RecipeService {
         return repo.findVisibleToUser(user);
     }
     
-    // delete recipe by id
+    // Delete recipe by id
     public void deleteRecipe(Long id) {
         repo.deleteById(id);
     }
+    
+    // Update recipe by id
+    @Transactional
+    public Recipe updateRecipe(Long id, Recipe updatedRecipe) {
+        Recipe existingRecipe = repo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Recipe not found"));
 
+        existingRecipe.setName(updatedRecipe.getName());
+
+        // Delete old products (since it can't edit product, especially once those that doesn't have an id
+        existingRecipe.getProducts().clear();
+        
+        // adding new products
+        if (updatedRecipe.getProducts() != null) {
+            for (RecipeProduct rp : updatedRecipe.getProducts()) {
+                Product product = rp.getProduct();
+                if (product != null && product.getId() == null) {
+                    // Новый продукт: сначала сохраняем
+                    Product savedProduct = productRepository.save(product);
+                    rp.setProduct(savedProduct);
+                }
+                rp.setRecipe(existingRecipe);
+                existingRecipe.getProducts().add(rp);
+            }
+        }
+
+        return repo.save(existingRecipe);
+    }
 }

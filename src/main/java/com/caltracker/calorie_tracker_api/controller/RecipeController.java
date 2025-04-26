@@ -11,49 +11,55 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/recipes")
-@CrossOrigin  // Allow requests from other domains (for frontend apps)
+@CrossOrigin // Allow requests from other websites (not just our server)
 public class RecipeController {
 
-    private final RecipeService recipeService;
+    private final RecipeService service;
 
-    // Constructor to inject the RecipeService
-    public RecipeController(RecipeService recipeService) {
-        this.recipeService = recipeService;
-    }
-
-    @PostMapping("/add")
-    public ResponseEntity<RecipeSimpleDTO> addRecipe(@RequestBody Recipe recipe) {
-        // Save a new recipe that comes from the client
-        Recipe savedRecipe = recipeService.add(recipe);
-        // Return the saved recipe back to the client
-        // return ResponseEntity.ok(savedRecipe); - this used to give recursive json, my bad
-        return ResponseEntity.ok(RecipeSimpleDTO.fromRecipe(savedRecipe)); // this is esoteric and probably needs another structure
+    public RecipeController(RecipeService service) {
+        this.service = service; // Inject the service that does the real work (like talking to the database)
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllRecipes() {
-        // Return a list of all recipes
-        List<RecipeSimpleDTO> recipes = recipeService.getAll().stream()
-                .map(RecipeSimpleDTO::fromRecipe)
+    public List<RecipeSimpleDTO> getAllRecipes() {
+        // Get all recipes and convert them into simple DTOs for the frontend
+        List<Recipe> recipes = service.getAll();
+        return recipes.stream()
+                .map(RecipeSimpleDTO::fromRecipe) // Change each Recipe into a RecipeSimpleDTO
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(recipes);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getRecipeById(@PathVariable Long id) {
-        // Try to find a recipe by its ID
-        Recipe recipe = recipeService.getById(id);
+    public ResponseEntity<RecipeSimpleDTO> getRecipeById(@PathVariable Long id) {
+        // Get one recipe by its ID
+        Recipe recipe = service.getById(id);
         if (recipe == null) {
-            // If no recipe is found, return 404 Not Found
+            // If no recipe found, return 404
             return ResponseEntity.notFound().build();
         }
-        // Otherwise, return the recipe
+        // If found, return 200 OK and the recipe
         return ResponseEntity.ok(RecipeSimpleDTO.fromRecipe(recipe));
     }
-    
+
+    @PostMapping
+    public ResponseEntity<RecipeSimpleDTO> addRecipe(@RequestBody Recipe recipe) {
+        // Save a new recipe (sent from frontend) into the database
+        Recipe saved = service.add(recipe);
+        return ResponseEntity.ok(RecipeSimpleDTO.fromRecipe(saved));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RecipeSimpleDTO> updateRecipe(@PathVariable Long id, @RequestBody Recipe updated) {
+        // Update an existing recipe with new data
+        Recipe saved = service.updateRecipe(id, updated);
+        return ResponseEntity.ok(RecipeSimpleDTO.fromRecipe(saved));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
-        recipeService.deleteRecipe(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        // Delete the recipe with the given ID
+        service.deleteRecipe(id);
+        // Return 204 No Content (means successful delete, nothing to show back)
+        return ResponseEntity.noContent().build();
     }
 }

@@ -11,9 +11,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController // This class will handle HTTP requests
-@RequestMapping("/meals") // Base URL path for all methods in this controller
-@CrossOrigin // Allow requests from other domains (for frontend to work)
+@RestController
+@RequestMapping("/meals")
+@CrossOrigin
 public class MealController {
 
     private final MealEntryService mealService;
@@ -22,49 +22,58 @@ public class MealController {
         this.mealService = mealService;
     }
 
-    @GetMapping("/{date}") // Get all meals for a specific date
+    // --- Get meals for a specific date ---
+    @GetMapping("/{date}")
     public List<MealEntrySimpleDTO> getMealsByDate(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         List<MealEntry> meals = mealService.getMealsByDate(date);
-
-        // Convert MealEntry objects to simpler DTOs for frontend
         return meals.stream()
                 .map(MealEntrySimpleDTO::fromMealEntry)
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/{date}/summary") // Get total summary (like calories, proteins, etc.) for the day
+    // --- Get meal summary for a specific date ---
+    @GetMapping("/{date}/summary")
     public ResponseEntity<?> getMealSummary(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
-        // Return the summary as a HTTP response
         return ResponseEntity.ok(mealService.getSummaryForDate(date));
     }
 
+    // --- Add a new meal ---
     @PostMapping("/{date}/add")
-    public MealEntrySimpleDTO addMeal(
+    public ResponseEntity<MealEntrySimpleDTO> addMeal(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestBody MealEntry mealEntry // instead of old MealAddRequest
+            @RequestBody MealEntry mealEntry
     ) {
-        mealEntry.setDate(date); // Set date
+        mealEntry.setDate(date);
         MealEntry saved = mealService.addMeal(mealEntry);
-        return MealEntrySimpleDTO.fromMealEntry(saved);
+        return ResponseEntity.ok(MealEntrySimpleDTO.fromMealEntry(saved));
     }
 
-
-
-    @GetMapping("/recent") // Get a list of recent meals (like last 10 added)
+    // --- Get recent meals ---
+    @GetMapping("/recent")
     public List<MealEntrySimpleDTO> getRecentMeals() {
         return mealService.getRecentMeals().stream()
                 .map(MealEntrySimpleDTO::fromMealEntry)
                 .collect(Collectors.toList());
     }
-    
+
+    // --- Delete a meal ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMeal(@PathVariable Long id) {
         mealService.deleteMeal(id);
         return ResponseEntity.noContent().build(); // 204 No Content
     }
 
+    // --- Update a meal ---
+    @PutMapping("/{id}")
+    public ResponseEntity<MealEntrySimpleDTO> updateMeal(
+            @PathVariable Long id,
+            @RequestBody MealEntry updatedMeal
+    ) {
+        MealEntry saved = mealService.updateMeal(id, updatedMeal);
+        return ResponseEntity.ok(MealEntrySimpleDTO.fromMealEntry(saved));
+    }
 }

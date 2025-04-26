@@ -8,61 +8,56 @@ import com.caltracker.calorie_tracker_api.repository.MealEntryRepository;
 import com.caltracker.calorie_tracker_api.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 
-@Service  // This annotation tells Spring that this class is a service
+@Service
 public class MealEntryService {
 
     private final MealEntryRepository mealRepo;
     private final ProductRepository productRepository;
 
-    // Constructor to inject repositories (MealEntry and Product)
     public MealEntryService(MealEntryRepository mealRepo, ProductRepository productRepository) {
         this.mealRepo = mealRepo;
         this.productRepository = productRepository;
     }
 
-    // --- Normal operations ---
-
-    // Get meals by a specific date
+    // Get all meals for a given date
     public List<MealEntry> getMealsByDate(LocalDate date) {
         return mealRepo.findByDate(date);
     }
 
-    // Add a new meal (and save new products if they don't exist yet)
+    // Add a new meal
     public MealEntry addMeal(MealEntry entry) {
         if (entry.getProducts() != null) {
             for (MealProduct mp : entry.getProducts()) {
                 Product product = mp.getProduct();
+                // If product is new (no ID), we save it first
                 if (product != null && product.getId() == null) {
-                    // If the product has no ID, it is new -> save it to the database first
                     Product savedProduct = productRepository.save(product);
-                    mp.setProduct(savedProduct); // Update meal product with saved product (with ID now)
+                    mp.setProduct(savedProduct);
                 }
-                mp.setMealEntry(entry); // Link each MealProduct back to its MealEntry
+                // Link the meal entry to the product
+                mp.setMealEntry(entry);
             }
         }
-        // Save the meal entry with its products
         return mealRepo.save(entry);
     }
 
-    // Get the 10 most recent meals
+    // Get 10 most recent meals
     public List<MealEntry> getRecentMeals() {
         return mealRepo.findTop10ByOrderByDateDesc();
     }
 
-    // Calculate total calories for a meal entry
+    // Calculate total calories for one meal
     public double calculateTotalCalories(MealEntry entry) {
         return entry.getProducts().stream()
-                .mapToDouble(mp -> {
-                    Product p = mp.getProduct();
-                    return (p.getCalories() / 100.0) * mp.getAmountInGrams();
-                })
+                .mapToDouble(mp -> (mp.getProduct().getCalories() / 100.0) * mp.getAmountInGrams())
                 .sum();
     }
 
-    // --- Summarize nutrition for a specific day ---
+    // Get daily summary (calories, protein, fat, carbs)
     public MealSummaryDTO getSummaryForDate(LocalDate date) {
         List<MealEntry> meals = getMealsByDate(date);
 
@@ -83,7 +78,7 @@ public class MealEntryService {
             }
         }
 
-        // Return the rounded totals
+        // Round results to 1 decimal place
         return new MealSummaryDTO(
                 Math.round(totalCalories * 10.0) / 10.0,
                 Math.round(totalProtein * 10.0) / 10.0,
@@ -91,11 +86,38 @@ public class MealEntryService {
                 Math.round(totalCarbs * 10.0) / 10.0
         );
     }
-    
+
+    // Delete a meal by ID
     public void deleteMeal(Long id) {
         mealRepo.deleteById(id);
     }
 
-    
+    // Update an existing meal
+    @Transactional
+    public MealEntry updateMeal(Long id, MealEntry updatedMeal) {
+        MealEntry existingMeal = mealRepo.findById(id) //findinf existing meal
+            .orElseThrow(() -> new RuntimeException("Meal not found"));
+
+        existingMeal.setTitle(updatedMeal.getTitle());
+//        existingMeal.setDate(updatedMeal.getDate()); - not messing up the date
+
+        // Delete old products, because we can't edit those
+        existingMeal.getProducts().clear();
+
+        if (updatedMeal.getProducts() != null) {
+            for (MealProduct mp : updatedMeal.getProducts()) {
+                Product product = mp.getProduct();
+                if (product != null && product.getId() == null) {
+                    // if new product - save to the base
+                    Product savedProduct = productRepository.save(product);
+                    mp.setProduct(savedProduct);
+                }
+                mp.setMealEntry(existingMeal); //connecting
+                existingMeal.getProducts().add(mp);
+            }
+        }
+
+        return mealRepo.save(existingMeal);
+    }
 
 }
