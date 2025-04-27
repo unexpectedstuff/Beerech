@@ -1,180 +1,233 @@
-document.addEventListener("DOMContentLoaded", () => { 
-    setupEditableTitle(); // Initialize the editable plan title
-    updateTotalNutrition(); // Calculate and update the total nutrition info at the bottom of the page
-    applyEditedMeal(); // Apply the updated meal data if returning from mealconstructor
+let selectedRecipes = [];
+let editingPlanId = null;
+
+function updateRecipeList() {
+  const recipesContainer = document.getElementById('planconstructor-container');
+  recipesContainer.innerHTML = '';
+
+  selectedRecipes.forEach((recipe, index) => {
+    const recipeCard = document.createElement('div');
+    recipeCard.classList.add('planconstructor-card');
+
+    recipeCard.innerHTML = `
+      <div class="meal-first">
+        <p class="plancons-title">${recipe.name || 'Unnamed Recipe'}</p>
+        <div class="meal-actions">
+          <img src="images/edit.png" class="icon-btn edit-btn" title="Edit" data-id="${recipe.id}" />
+        </div>
+      </div>
+      <div class="meal-second">
+        <p class="plancons-calories">${Math.round(calculateTotalCalories(recipe))} kcal</p>
+        <div class="meal-actions">
+          <img src="images/delete.png" class="icon-btn delete-btn" title="Delete" data-index="${index}" />
+        </div>
+      </div>
+      <div class="meal-nutrients">
+        <span>Proteins: ${Math.round(calculateTotal(recipe, 'protein'))}g</span>
+        <span>Fats: ${Math.round(calculateTotal(recipe, 'fat'))}g</span>
+        <span>Carbs: ${Math.round(calculateTotal(recipe, 'carbs'))}g</span>
+      </div>
+    `;
+
+    recipesContainer.appendChild(recipeCard);
   });
-  
-  // Makes the plan title editable on click
-  function setupEditableTitle() {
-    const titleEl = document.getElementById("planTitle");
-    const currentPlanName = localStorage.getItem("currentPlanName") || "Plan 1";
-    titleEl.textContent = currentPlanName;
-  
-    titleEl.addEventListener("click", () => {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = titleEl.textContent;
-      input.className = "planconstructor-input";
-  
-      titleEl.replaceWith(input);
-      input.focus();
-  
-      const saveTitle = () => {
-        const newTitle = input.value.trim() || "Plan 1";
-        localStorage.setItem("currentPlanName", newTitle);
-  
-        const newTitleEl = document.createElement("p");
-        newTitleEl.id = "planTitle";
-        newTitleEl.className = "planconstructor-title";
-        newTitleEl.textContent = newTitle;
-        input.replaceWith(newTitleEl);
-        setupEditableTitle(); // Re-bind click listener
-      };
-  
-      input.addEventListener("blur", saveTitle);
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") saveTitle();
+
+  attachEventListeners();
+}
+
+function attachEventListeners() {
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const recipeId = btn.getAttribute('data-id');
+      editRecipe(recipeId);
+    });
+  });
+
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const index = btn.getAttribute('data-index');
+      removeRecipe(index);
+    });
+  });
+}
+
+function removeRecipe(index) {
+  selectedRecipes.splice(index, 1);
+  updateRecipeList();
+}
+
+function editRecipe(recipeId) {
+  localStorage.setItem('editItemId', recipeId);
+  localStorage.setItem('navigationSource', 'plans');
+  window.location.href = 'mealconstructor.html';
+}
+
+function savePlan() {
+  let planTitle = "Untitled Plan";
+
+  const inputTitle = document.querySelector('input.planconstructor-input');
+  const planTitleElement = document.getElementById('planTitle');
+
+  if (inputTitle) {
+    // If user edits the name - we use input
+    planTitle = inputTitle.value.trim() || "Untitled Plan";
+  } else if (planTitleElement) {
+    // Or take as usuall
+    planTitle = planTitleElement.textContent.trim() || "Untitled Plan";
+  }
+
+  const token = localStorage.getItem('token');
+  const planData = {
+    title: planTitle,
+    recipes: selectedRecipes.map(r => ({ id: r.id }))
+  };
+
+  const method = editingPlanId ? 'PUT' : 'POST';
+  const url = editingPlanId ? `http://localhost:8080/meal-plans/${editingPlanId}` : 'http://localhost:8080/meal-plans/add';
+
+  fetch(url, {
+    method,
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(planData)
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to save plan');
+      localStorage.removeItem('editPlanId');
+      window.location.href = 'plans.html';
+    })
+    .catch(err => {
+      console.error('Error saving plan:', err);
+      alert('Failed to save plan.');
+    });
+}
+
+
+function loadAvailableRecipes() {
+  const token = localStorage.getItem('token');
+  fetch('http://localhost:8080/recipes', {
+    headers: { "Authorization": "Bearer " + token }
+  })
+    .then(res => res.json())
+    .then(recipes => {
+      const select = document.getElementById('recipe-select');
+      if (select) {
+        select.innerHTML = '<option value="">Select recipe...</option>';
+        recipes.forEach(recipe => {
+          const option = document.createElement('option');
+          option.value = recipe.id;
+          option.textContent = recipe.name;
+          select.appendChild(option);
+        });
+
+        select.addEventListener('change', () => {
+          const selectedId = select.value;
+          const selectedRecipe = recipes.find(r => r.id == selectedId);
+          if (selectedRecipe) {
+            selectedRecipes.push(selectedRecipe);
+            updateRecipeList();
+          }
+        });
+      }
+    })
+    .catch(err => console.error('Error loading recipes:', err));
+}
+
+function calculateTotal(recipe, field) {
+  return recipe.products?.reduce((acc, prod) => {
+    return acc + (prod.product?.[field] || 0) * (prod.amountInGrams || 0) / 100;
+  }, 0) || 0;
+}
+
+function calculateTotalCalories(recipe) {
+  return calculateTotal(recipe, 'calories');
+}
+
+function handleTitleClick() {
+  const planTitleElement = document.getElementById('planTitle');
+  const currentTitle = planTitleElement.textContent.trim();
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentTitle;
+  input.className = 'planconstructor-input';
+  input.style.width = '100%';
+  input.style.fontSize = '30px';
+  input.style.textAlign = 'center';
+  input.style.fontWeight = '600';
+  input.style.border = 'none';
+  input.style.outline = 'none';
+  input.style.backgroundColor = 'transparent';
+
+  planTitleElement.replaceWith(input);
+  input.focus();
+
+  function saveTitle() {
+    const newTitle = input.value.trim() || 'Untitled Plan';
+    const newPlanTitle = document.createElement('p');
+    newPlanTitle.id = 'planTitle';
+    newPlanTitle.className = 'planconstructor-title';
+    newPlanTitle.textContent = newTitle;
+
+    input.replaceWith(newPlanTitle);
+    newPlanTitle.addEventListener('click', handleTitleClick);
+  }
+
+  input.addEventListener('blur', saveTitle);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveTitle();
+    }
+  });
+}
+
+function navigateTo(page) {
+  if (page === 'mealconstructor.html') {
+    localStorage.setItem('navigationSource', 'plans');
+  }
+  window.location.href = page;
+}
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const navigationSource = localStorage.getItem('navigationSource');
+  const editedRecipeId = localStorage.getItem('editItemId');
+
+  if (navigationSource === 'plans' && editedRecipeId) {
+    // Здесь можно подгружать обновлённые данные рецепта если нужно
+    localStorage.removeItem('editItemId');
+    localStorage.removeItem('navigationSource');
+  }
+
+  editingPlanId = localStorage.getItem('editPlanId');
+
+  if (editingPlanId) {
+    const token = localStorage.getItem('token');
+    fetch(`http://localhost:8080/meal-plans/${editingPlanId}`, {
+      headers: { "Authorization": "Bearer " + token }
+    })
+      .then(res => res.json())
+      .then(plan => {
+        const planTitleInput = document.getElementById('planTitle');
+        planTitleInput.textContent = plan.title || "Untitled Plan";
+        selectedRecipes = plan.recipes || [];
+        updateRecipeList();
+      })
+      .catch(err => {
+        console.error('Error loading plan:', err);
+        alert('Failed to load plan.');
       });
-    });
   }
-  
-  // Calculates and updates total nutrition info at the bottom of the page
-  function updateTotalNutrition() {
-    const cards = document.querySelectorAll('.planconstructor-card');
-  
-    let totalCalories = 0, totalProteins = 0, totalFats = 0, totalCarbs = 0;
-  
-    cards.forEach(card => {
-      totalCalories += parseInt(card.querySelector('.planconstructor-calories').textContent) || 0;
-  
-      const nutrients = card.querySelectorAll('.planconstructor-nutrients span');
-      totalProteins += parseInt(nutrients[0].textContent.replace(/\D/g, '')) || 0;
-      totalFats += parseInt(nutrients[1].textContent.replace(/\D/g, '')) || 0;
-      totalCarbs += parseInt(nutrients[2].textContent.replace(/\D/g, '')) || 0;
-    });
-  
-    // Update text on total info card
-    document.getElementById('planconstructortotal-info').textContent = `${totalCalories} kcal`;
-    document.getElementById('planconstructorproteins-info').textContent = `${totalProteins}g`;
-    document.getElementById('planconstructorfats-info').textContent = `${totalFats}g`;
-    document.getElementById('planconstructorcarbs-info').textContent = `${totalCarbs}g`;
-  
-    // Calculate percentage based on user calorie target
-    const user = JSON.parse(localStorage.getItem('user')) || {};
-    const target = Number(user?.calories || 2000);
-  
-    document.getElementById('planconstructorcalories-percent').textContent = `${Math.round((totalCalories / target) * 100)}%`;
-    document.getElementById('planconstructorprotein-percent').textContent = `${Math.round((totalProteins * 4 / target) * 100)}%`;
-    document.getElementById('planconstructorfat-percent').textContent = `${Math.round((totalFats * 9 / target) * 100)}%`;
-    document.getElementById('planconstructorcarbs-percent').textContent = `${Math.round((totalCarbs * 4 / target) * 100)}%`;
+
+  const planTitleElement = document.getElementById('planTitle');
+  if (planTitleElement) {
+    planTitleElement.addEventListener('click', handleTitleClick);
   }
-  
-  // Collects plan data and saves it in localStorage
-  function savePlan() {
-    const name = document.getElementById('planTitle')?.textContent || "Plan 1";
-    const cards = document.querySelectorAll('.planconstructor-card');
-  
-    const meals = [...cards].map(card => {
-      return {
-        title: card.querySelector('.planconstructor-title').textContent,
-        calories: card.querySelector('.planconstructor-calories').textContent.replace(/\D/g, ''),
-        proteins: card.querySelector('.planconstructor-nutrients span:nth-child(1)').textContent.replace(/\D/g, ''),
-        fats: card.querySelector('.planconstructor-nutrients span:nth-child(2)').textContent.replace(/\D/g, ''),
-        carbs: card.querySelector('.planconstructor-nutrients span:nth-child(3)').textContent.replace(/\D/g, '')
-      };
-    });
-  
-    let totalCalories = 0, totalProteins = 0, totalFats = 0, totalCarbs = 0;
-    meals.forEach(meal => {
-      totalCalories += Number(meal.calories);
-      totalProteins += Number(meal.proteins);
-      totalFats += Number(meal.fats);
-      totalCarbs += Number(meal.carbs);
-    });
-  
-    const plan = {
-      name,
-      calories: totalCalories,
-      proteins: totalProteins,
-      fats: totalFats,
-      carbs: totalCarbs,
-      meals
-    };
-  
-    const plans = JSON.parse(localStorage.getItem("plans")) || [];
-    plans.push(plan);
-    localStorage.setItem("plans", JSON.stringify(plans));
-  
-    window.location.href = "plans.html"; // Redirect after saving
-  }
-  
-  // Edit meal: Save selected meal to localStorage and redirect to mealconstructor
-  function editPlanConstructor(icon) {
-    const card = icon.closest(".planconstructor-card");
-  
-    // Make sure the card exists before proceeding
-    if (!card) {
-      console.error("No meal card found for editing.");
-      return;
-    }
-  
-    // Get the data from the selected meal card
-    const meal = {
-      title: card.querySelector(".planconstructor-title").textContent,
-      calories: card.querySelector(".planconstructor-calories").textContent.replace(/\D/g, ''),
-      proteins: card.querySelector(".planconstructor-nutrients span:nth-child(1)").textContent.replace(/\D/g, ''),
-      fats: card.querySelector(".planconstructor-nutrients span:nth-child(2)").textContent.replace(/\D/g, ''),
-      carbs: card.querySelector(".planconstructor-nutrients span:nth-child(3)").textContent.replace(/\D/g, ''),
-      index: [...document.querySelectorAll(".planconstructor-card")].indexOf(card), // Capture the index of the card for later
-    };
-  
-    // Save the meal data in localStorage (to be used on the mealconstructor page)
-    localStorage.setItem("editingMeal", JSON.stringify(meal));
-  
-    // Redirect to the meal constructor page
-    window.location.href = "mealconstructor.html";
-  }
-  
-  // Delete meal: Remove selected meal from the plan
-  function deletePlanConstructor(icon) {
-    const card = icon.closest(".planconstructor-card");
-  
-    // Make sure the card exists before proceeding
-    if (!card) {
-      console.error("No meal card found for deletion.");
-      return;
-    }
-  
-    // Remove the selected meal card from the DOM
-    card.remove();
-  
-    // Update the total nutrition info after deletion
-    updateTotalNutrition();
-  }
-  
-  // Navigate to a different page (used by "Back" and "Add" buttons)
-  function navigateTo(url) {
-    window.location.href = url;
-  }
-  
-  // Apply updated meal data when returning from mealconstructor
-  function applyEditedMeal() {
-    const editedMeal = JSON.parse(localStorage.getItem("editedMeal"));
-    
-    if (editedMeal) {
-      // Find the card with the same title and update its details
-      const cards = document.querySelectorAll(".planconstructor-card");
-      cards.forEach(card => {
-        const titleEl = card.querySelector(".planconstructor-title");
-        if (titleEl.textContent === editedMeal.title) {
-          card.querySelector(".planconstructor-calories").textContent = `${editedMeal.calories} kcal`;
-          card.querySelector(".planconstructor-nutrients span:nth-child(1)").textContent = `Proteins: ${editedMeal.proteins}g`;
-          card.querySelector(".planconstructor-nutrients span:nth-child(2)").textContent = `Fats: ${editedMeal.fats}g`;
-          card.querySelector(".planconstructor-nutrients span:nth-child(3)").textContent = `Carbs: ${editedMeal.carbs}g`;
-        }
-      });
-  
-      // Remove the edited meal from localStorage after applying
-      localStorage.removeItem("editedMeal");
-    }
-  }
+
+  document.querySelector('.save-btn').addEventListener('click', savePlan);
+
+  loadAvailableRecipes();
+});

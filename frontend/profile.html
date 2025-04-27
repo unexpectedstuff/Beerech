@@ -1,46 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-    <div class="page-container">
+  <div class="page-container">
     <p class="profile-title">My Profile</p>
 
     <div class="profile-box">
-            <img id="user-avatar" src="" alt="User Avatar" />
-            <div class="user-details">
-              <p id="username">Username</p>
-              <p id="email">user@example.com</p>
-            </div>
+      <img id="user-avatar" src="" alt="User Avatar" />
+      <div class="user-details">
+        <p id="username">Username</p>
+        <p id="email">user@example.com</p>
+        <!-- Скрытые поля для безопасного обновления в JS -->
+        <p id="age" style="display: none;"></p>
+        <p id="weight" style="display: none;"></p>
+        <p id="height" style="display: none;"></p>
+        <p id="gender" style="display: none;"></p>
+        <p id="goal" style="display: none;"></p>
+        <p id="calorieTarget" style="display: none;"></p>
+      </div>
     </div>
+
     <div class="menu">
-        <div class="menu-item" onclick="navigateTo('today.html')">
-          <img src="images/today.png" alt="Today's Report" />
-          <span>Today's Report</span>
-        </div>
-        <div class="menu-item" onclick="navigateTo('plans.html')">
-          <img src="images/future.png" alt="Future Plans" />
-          <span>Future Plans</span>
-        </div>
-        <div class="menu-item" onclick="navigateTo('target.html')">
-          <img src="images/target.png" alt="My Nutrition Target" />
-          <span>My Nutrition Target</span>
-        </div>
-        <div class="menu-item" onclick="navigateTo('myrecipes.html')">
-          <img src="images/myrecipes.png" alt="My Recipes" />
-          <span>My Recipes</span>
-        </div>
-        <div class="menu-item" onclick="confirmLogout()">
-          <img src="images/logOut.png" alt="Log Out" />
-          <span>Log Out</span>
-        </div>
+      <div class="menu-item" onclick="navigateTo('today.html')">
+        <img src="images/today.png" alt="Today's Report" />
+        <span>Today's Report</span>
+      </div>
+      <div class="menu-item" onclick="navigateTo('plans.html')">
+        <img src="images/future.png" alt="Future Plans" />
+        <span>Future Plans</span>
+      </div>
+      <div class="menu-item" onclick="navigateTo('target.html')">
+        <img src="images/target.png" alt="My Nutrition Target" />
+        <span>My Nutrition Target</span>
+      </div>
+      <div class="menu-item" onclick="navigateTo('myrecipes.html')">
+        <img src="images/myrecipes.png" alt="My Recipes" />
+        <span>My Recipes</span>
+      </div>
+      <div class="menu-item" onclick="confirmLogout()">
+        <img src="images/logOut.png" alt="Log Out" />
+        <span>Log Out</span>
+      </div>
     </div>
-        <img src="images/logo.png" alt="logo" class="logoBottom" />
-    </div> 
-  <script src="js/profile.js"></script>      
+
+    <img src="images/logo.png" alt="logo" class="logoBottom" />
+  </div>
+
+  <script src="js/profile.js"></script>
 </body>
 </html>

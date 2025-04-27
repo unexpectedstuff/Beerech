@@ -32,6 +32,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const btn = document.getElementById(data.gender.toLowerCase());
         if (btn) btn.checked = true;
       }
+      if (data.activityLevel) {
+        setSelectedActivity(data.activityLevel);
+      }
 
       validateForm();
     })
@@ -47,6 +50,31 @@ document.addEventListener("DOMContentLoaded", function () {
   function getSelectedGender() {
     const selected = document.querySelector('input[name="gender"]:checked');
     return selected ? selected.value.toUpperCase() : null;
+  }
+
+  function getSelectedActivityLevel() {
+    const activityMap = {
+      "1.2": "RARELY",
+      "1.375": "ONE_TO_TWO_TIMES",
+      "1.55": "THREE_TO_FIVE_TIMES",
+      "1.725": "SIX_TO_SEVEN_TIMES",
+      "1.9": "DAILY_INTENSE"
+    };
+    return activityMap[activitySelect.value] || "RARELY";
+  }
+
+  function setSelectedActivity(activityLevel) {
+    const levelMap = {
+      "RARELY": "1.2",
+      "ONE_TO_TWO_TIMES": "1.375",
+      "THREE_TO_FIVE_TIMES": "1.55",
+      "SIX_TO_SEVEN_TIMES": "1.725",
+      "DAILY_INTENSE": "1.9"
+    };
+    const value = levelMap[activityLevel];
+    if (value) {
+      activitySelect.value = value;
+    }
   }
 
   function validateForm() {
@@ -108,7 +136,8 @@ document.addEventListener("DOMContentLoaded", function () {
       gender,
       calorieTarget: Math.round(
         (10 * weight + 6.25 * height - 5 * age + (gender === "MALE" ? 5 : -161)) * activity
-      )
+      ),
+      activityLevel: getSelectedActivityLevel()
     };
 
     fetch("http://localhost:8080/user/profile", {

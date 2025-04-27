@@ -1,12 +1,7 @@
-// Ingredient Database (default)
-const INGREDIENT_DB = {
-  chicken: { name: 'Chicken Breast', base: { proteins: 22, fats: 3, carbs: 0, kcal: 110 } },
-  olive: { name: 'Olive Oil', base: { proteins: 0, fats: 100, carbs: 0, kcal: 900 } },
-  rice: { name: 'Rice (Cooked)', base: { proteins: 2.7, fats: 0.3, carbs: 28, kcal: 130 } }
-};
-
-// Variables
 let ingredients = [];
+let editingId = null;
+let editingType = null;
+
 const mealName = document.getElementById('meal-name');
 const ingredientTableBody = document.getElementById('ingredient-body');
 const totalWeight = document.getElementById('total-weight');
@@ -19,489 +14,387 @@ const per100Fats = document.getElementById('per100-fats');
 const per100Carbs = document.getElementById('per100-carbs');
 const per100Kcal = document.getElementById('per100-kcal');
 
-// Add ingredient from dropdown (API-based)
-async function loadIngredientsFromAPI() {
-  try {
-    // Mocking an API response for ingredients
-    const response = await fetch('https://example.com/api/ingredients'); // CHANGE FOR THE WORKINK ONE
-    const ingredientsFromAPI = await response.json();
+function updateTotals() {
+  const totals = ingredients.reduce((acc, ing) => {
+    acc.weight += ing.weight || 0;
+    acc.proteins += ing.proteins || 0;
+    acc.fats += ing.fats || 0;
+    acc.carbs += ing.carbs || 0;
+    acc.kcal += ing.kcal || 0;
+    return acc;
+  }, { weight: 0, proteins: 0, fats: 0, carbs: 0, kcal: 0 });
 
-    // List of ingredients
-    createIngredientSelect(ingredientsFromAPI);
-  } catch (error) {
-    console.error("Ошибка при загрузке ингредиентов с API:", error);
-  }
+  totalWeight.textContent = Math.round(totals.weight);
+  totalProteins.textContent = Math.round(totals.proteins);
+  totalFats.textContent = Math.round(totals.fats);
+  totalCarbs.textContent = Math.round(totals.carbs);
+  totalKcal.textContent = Math.round(totals.kcal);
+
+  const divisor = totals.weight || 1;
+  per100Proteins.textContent = Math.round((totals.proteins / divisor) * 100);
+  per100Fats.textContent = Math.round((totals.fats / divisor) * 100);
+  per100Carbs.textContent = Math.round((totals.carbs / divisor) * 100);
+  per100Kcal.textContent = Math.round((totals.kcal / divisor) * 100);
 }
 
-// Dynamic list
-function createIngredientSelect(ingredientsFromAPI) {
-  const select = document.createElement('select');
-  select.id = 'ingredient-select';
-
-  // Options fo every ingredient
-  ingredientsFromAPI.forEach(ingredient => {
-    const option = document.createElement('option');
-    option.value = ingredient.id; // id from API
-    option.textContent = ingredient.name; // name from API
-    select.appendChild(option);
+async function suggestProducts(query) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`http://localhost:8080/products?search=${encodeURIComponent(query)}`, {
+    headers: { "Authorization": "Bearer " + token }
   });
-
-  const addIngredientBtn = document.querySelector('.add-ingredient-btn');
-  addIngredientBtn.before(select);
-}
-
-// Add the ingredient
-function addIngredient() {
-  const select = document.getElementById('ingredient-select');
-  const selectedKey = select.value;
-  const data = INGREDIENT_DB[selectedKey];
-  const weight = 100;
-
-  const ingredient = {
-    id: ingredients.length + 1,
-    name: data.name,
-    weight: weight,
-    base: data.base,
-    proteins: (data.base.proteins * weight) / 100,
-    fats: (data.base.fats * weight) / 100,
-    carbs: (data.base.carbs * weight) / 100,
-    kcal: (data.base.kcal * weight) / 100,
-  };
-
-  ingredients.push(ingredient);
-  updateIngredientTable();
-  updateTotals();
-}
-
-// Update the ingredient
-function updateIngredientWeight(index, input) {
-  const weight = Number(input.value);
-  if (weight <= 0) return;
-
-  const base = ingredients[index].base;
-  const updated = {
-    weight,
-    proteins: (base.proteins * weight) / 100,
-    fats: (base.fats * weight) / 100,
-    carbs: (base.carbs * weight) / 100,
-    kcal: (base.kcal * weight) / 100
-  };
-
-  Object.assign(ingredients[index], updated);
-
-  const row = input.closest('tr');
-  row.querySelector('.protein-cell').textContent = Math.round(updated.proteins);
-  row.querySelector('.fat-cell').textContent = Math.round(updated.fats);
-  row.querySelector('.carb-cell').textContent = Math.round(updated.carbs);
-  row.querySelector('.kcal-cell').textContent = Math.round(updated.kcal);
-
-  updateTotals();
-}
-
-// Delete the ingredient
-function removeIngredient(index) {
-  ingredients.splice(index, 1);
-  updateIngredientTable();
-  updateTotals();
-}
-
-// Update Nutritions
-function getTotalNutrition(data) {
-  return data.reduce((totals, ing) => {
-    totals.weight += ing.weight;
-    totals.proteins += ing.proteins;
-    totals.fats += ing.fats;
-    totals.carbs += ing.carbs;
-    totals.kcal += ing.kcal;
-    return totals;
-  }, { weight: 0, proteins: 0, fats: 0, carbs: 0, kcal: 0 });
-}
-
-// Update
-function updateTotals() {
-  const totals = getTotalNutrition(ingredients);
-
-  totalWeight.textContent = Math.round(totals.weight);
-  totalProteins.textContent = Math.round(totals.proteins);
-  totalFats.textContent = Math.round(totals.fats);
-  totalCarbs.textContent = Math.round(totals.carbs);
-  totalKcal.textContent = Math.round(totals.kcal);
-
-  const divisor = totals.weight || 1; // validation of zero substraction
-  per100Proteins.textContent = Math.round((totals.proteins / divisor) * 100);
-  per100Fats.textContent = Math.round((totals.fats / divisor) * 100);
-  per100Carbs.textContent = Math.round((totals.carbs / divisor) * 100);
-  per100Kcal.textContent = Math.round((totals.kcal / divisor) * 100);
-}
-
-// Connect to the button
-document.querySelector('.add-ingredient-btn').addEventListener('click', loadIngredientsFromAPI);
-
-// Download the recipe
-window.addEventListener('DOMContentLoaded', () => {
-  const editRecipe = JSON.parse(localStorage.getItem('editRecipe'));
-  if (editRecipe) {
-    mealName.value = editRecipe.name;
-    ingredients = editRecipe.mealData.ingredients;
-    updateIngredientTable();
-    updateTotals();
+  if (!response.ok) {
+    console.error('Failed to fetch products');
+    return [];
   }
-});
-
-// Ingredient weight update
-function updateIngredientWeight(index, input) {
-  const weight = Number(input.value);
-  if (weight <= 0) return;
-
-  const base = ingredients[index].base;
-  const updated = {
-    weight,
-    proteins: (base.proteins * weight) / 100,
-    fats: (base.fats * weight) / 100,
-    carbs: (base.carbs * weight) / 100,
-    kcal: (base.kcal * weight) / 100
-  };
-
-  Object.assign(ingredients[index], updated);
-
-  const row = input.closest('tr');
-  row.querySelector('.protein-cell').textContent = Math.round(updated.proteins);
-  row.querySelector('.fat-cell').textContent = Math.round(updated.fats);
-  row.querySelector('.carb-cell').textContent = Math.round(updated.carbs);
-  row.querySelector('.kcal-cell').textContent = Math.round(updated.kcal);
-
-  updateTotals();
+  return response.json();
 }
 
-// Remove ingredient
-function removeIngredient(index) {
-  ingredients.splice(index, 1);
+function addIngredient() {
+  ingredients.push({ name: "", weight: 100, proteins: 0, fats: 0, carbs: 0, kcal: 0 });
   updateIngredientTable();
   updateTotals();
 }
 
-// Reusable total nutrition calculator
-function getTotalNutrition(data) {
-  return data.reduce((totals, ing) => {
-    totals.weight += ing.weight;
-    totals.proteins += ing.proteins;
-    totals.fats += ing.fats;
-    totals.carbs += ing.carbs;
-    totals.kcal += ing.kcal;
-    return totals;
-  }, { weight: 0, proteins: 0, fats: 0, carbs: 0, kcal: 0 });
-}
-
-// Update totals
-function updateTotals() {
-  const totals = getTotalNutrition(ingredients);
-
-  totalWeight.textContent = Math.round(totals.weight);
-  totalProteins.textContent = Math.round(totals.proteins);
-  totalFats.textContent = Math.round(totals.fats);
-  totalCarbs.textContent = Math.round(totals.carbs);
-  totalKcal.textContent = Math.round(totals.kcal);
-
-  const divisor = totals.weight || 1; // Avoid divide by 0
-  per100Proteins.textContent = Math.round((totals.proteins / divisor) * 100);
-  per100Fats.textContent = Math.round((totals.fats / divisor) * 100);
-  per100Carbs.textContent = Math.round((totals.carbs / divisor) * 100);
-  per100Kcal.textContent = Math.round((totals.kcal / divisor) * 100);
-}
-
-// Load from API (mocked)
-function loadFromAPI() {
-  ingredients = [
-    {
-      name: 'Chicken Breast',
-      weight: 150,
-      base: INGREDIENT_DB.chicken.base
-    },
-    {
-      name: 'Olive Oil',
-      weight: 10,
-      base: INGREDIENT_DB.olive.base
-    }
-  ].map(ing => ({
-    ...ing,
-    proteins: (ing.base.proteins * ing.weight) / 100,
-    fats: (ing.base.fats * ing.weight) / 100,
-    carbs: (ing.base.carbs * ing.weight) / 100,
-    kcal: (ing.base.kcal * ing.weight) / 100
-  }));
-
-  updateIngredientTable();
-  updateTotals();
-}
-
-// Function to update the ingredients table
 function updateIngredientTable() {
   ingredientTableBody.innerHTML = '';
 
-  ingredients.forEach((ingredient, index) => {
+  ingredients.forEach((ing, index) => {
     const row = document.createElement('tr');
-    
     row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${ingredient.name}</td>
-      <td>
-        <input 
-          class="weight-input" 
-          type="number" 
-          value="${ingredient.weight}" 
-          min="1" 
-          onchange="updateIngredientWeight(${index}, this)" 
-          oninput="updateIngredientWeight(${index}, this)" />
-      </td>
-      <td class="protein-cell">${Math.round(ingredient.proteins)}</td>
-      <td class="fat-cell">${Math.round(ingredient.fats)}</td>
-      <td class="carb-cell">${Math.round(ingredient.carbs)}</td>
-      <td class="kcal-cell">${Math.round(ingredient.kcal)}</td>
-      <td><button class="remove-btn" onclick="removeIngredient(${index})">✕</button></td>
-    `;
-
+    <td>${index + 1}</td>
+    <td style="position:relative;">
+      <input 
+        value="${ing.name}" 
+        oninput="handleIngredientInput(${index}, this)" 
+        onchange="updateIngredientName(${index}, this)" 
+        onblur="hideSuggestions(${index})"
+        autocomplete="off"
+        style="width:45px; padding:4px 6px; border:1px solid #ccc; border-radius:4px; font-size:14px;"
+      />
+      <div class="suggestions" id="suggestions-${index}" 
+        style="position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ccc; z-index:1000; display:none;"></div>
+    </td>
+    <td><input type="number" value="${ing.weight}" onchange="updateIngredientWeight(${index}, this)"/></td>
+    <td><input type="number" value="${ing.proteins}" onchange="updateIngredientProtein(${index}, this)"/></td>
+    <td><input type="number" value="${ing.fats}" onchange="updateIngredientFat(${index}, this)"/></td>
+    <td><input type="number" value="${ing.carbs}" onchange="updateIngredientCarb(${index}, this)"/></td>
+    <td><input type="number" value="${ing.kcal}" onchange="updateIngredientKcal(${index}, this)"/></td>
+    <td><button class="remove-btn" onclick="removeIngredient(${index})">✕</button></td>
+  `;
     ingredientTableBody.appendChild(row);
   });
 }
 
-// Function to update the weight of an ingredient
-function updateIngredientWeight(index, input) {
-  const weight = Number(input.value);
-  if (weight <= 0) return;
+async function handleIngredientInput(index, input) {
+  const query = input.value.trim();
+  const suggestionsDiv = document.getElementById(`suggestions-${index}`);
 
-  const row = input.closest('tr');
-  const base = ingredients[index].base;
+  if (query.length < 2) {
+    suggestionsDiv.style.display = 'none';
+    return;
+  }
 
-  // Update nutrient values based on new weight
-  ingredients[index].weight = weight;
-  ingredients[index].proteins = (base.proteins * weight) / 100;
-  ingredients[index].fats = (base.fats * weight) / 100;
-  ingredients[index].carbs = (base.carbs * weight) / 100;
-  ingredients[index].kcal = (base.kcal * weight) / 100;
+  const suggestions = await suggestProducts(query);
+  const limited = suggestions.slice(0, 10);
 
-  // Update the corresponding row with new values
-  row.querySelector('.protein-cell').textContent = Math.round(ingredients[index].proteins);
-  row.querySelector('.fat-cell').textContent = Math.round(ingredients[index].fats);
-  row.querySelector('.carb-cell').textContent = Math.round(ingredients[index].carbs);
-  row.querySelector('.kcal-cell').textContent = Math.round(ingredients[index].kcal);
+  suggestionsDiv.innerHTML = '';
 
-  // Update total values
-  updateTotals();
-}
-
-// Function to remove an ingredient
-function removeIngredient(index) {
-  ingredients.splice(index, 1);
-  updateIngredientTable();
-  updateTotals();
-}
-
-// Function to recalculate total values
-function updateTotals() {
-  let totalW = 0, totalP = 0, totalF = 0, totalC = 0, totalK = 0;
-
-  ingredients.forEach(ingredient => {
-    totalW += ingredient.weight;
-    totalP += ingredient.proteins;
-    totalF += ingredient.fats;
-    totalC += ingredient.carbs;
-    totalK += ingredient.kcal;
-  });
-
-  totalWeight.innerText = Math.round(totalW);
-  totalProteins.innerText = Math.round(totalP);
-  totalFats.innerText = Math.round(totalF);
-  totalCarbs.innerText = Math.round(totalC);
-  totalKcal.innerText = Math.round(totalK);
-
-  // Calculate values per 100g
-  if (totalW > 0) {
-    per100Proteins.innerText = Math.round((totalP / totalW) * 100);
-    per100Fats.innerText = Math.round((totalF / totalW) * 100);
-    per100Carbs.innerText = Math.round((totalC / totalW) * 100);
-    per100Kcal.innerText = Math.round((totalK / totalW) * 100);
+  if (limited.length === 0) {
+    suggestionsDiv.innerHTML = `<div style="padding:8px; color:#777;">Nothing found</div>`;
   } else {
-    per100Proteins.innerText = 0;
-    per100Fats.innerText = 0;
-    per100Carbs.innerText = 0;
-    per100Kcal.innerText = 0;
+    limited.forEach(product => {
+      const option = document.createElement('div');
+      option.textContent = product.name;
+      option.style.padding = '8px';
+      option.style.cursor = 'pointer';
+      option.addEventListener('click', () => {
+        ingredients[index] = {
+          name: product.name,
+          weight: 100,
+          proteins: product.protein,
+          fats: product.fat,
+          carbs: product.carbs,
+          kcal: product.calories
+        };
+        updateIngredientTable();
+        updateTotals();
+      });
+      suggestionsDiv.appendChild(option);
+    });
+  }
+
+  suggestionsDiv.style.display = 'block';
+}
+
+function hideSuggestions(index) {
+  const suggestionsDiv = document.getElementById(`suggestions-${index}`);
+  if (suggestionsDiv) {
+    setTimeout(() => suggestionsDiv.style.display = 'none', 200);
   }
 }
 
-// Check the previous page
-const mode = localStorage.getItem("mealConstructorMode");  
+function updateIngredientName(index, input) { ingredients[index].name = input.value; }
+function updateIngredientWeight(index, input) { ingredients[index].weight = parseFloat(input.value) || 0; updateTotals(); }
+function updateIngredientProtein(index, input) { ingredients[index].proteins = parseFloat(input.value) || 0; updateTotals(); }
+function updateIngredientFat(index, input) { ingredients[index].fats = parseFloat(input.value) || 0; updateTotals(); }
+function updateIngredientCarb(index, input) { ingredients[index].carbs = parseFloat(input.value) || 0; updateTotals(); }
+function updateIngredientKcal(index, input) { ingredients[index].kcal = parseFloat(input.value) || 0; updateTotals(); }
+function removeIngredient(index) { ingredients.splice(index, 1); updateIngredientTable(); updateTotals(); }
 
-// Function to save the meal and return to the previous page
 function saveMealAndReturn() {
   if (!ingredients.length) {
     alert("Please add at least one ingredient.");
     return;
   }
-  const selectedDate = localStorage.getItem("selectedDate");
-  let meals = JSON.parse(localStorage.getItem("mealsByDate")) || {};
 
-  // Calculate nutrients
-  const totalKcal = Math.round(ingredients.reduce((sum, ing) => sum + ing.kcal, 0));
-  const totalProteins = Math.round(ingredients.reduce((sum, ing) => sum + ing.proteins, 0));
-  const totalFats = Math.round(ingredients.reduce((sum, ing) => sum + ing.fats, 0));
-  const totalCarbs = Math.round(ingredients.reduce((sum, ing) => sum + ing.carbs, 0));
+  const source = localStorage.getItem('navigationSource');
 
-  const newMeal = {
-    name: mealName.value || "Untitled Meal",
-    calories: totalKcal,
-    protein: totalProteins,
-    fat: totalFats,
-    carbs: totalCarbs,
-  };
-
-  // Add to mealsByDate if we save for today
-  if (mode === "addToToday") {
-    if (!meals[selectedDate]) meals[selectedDate] = [];
-    meals[selectedDate].push(newMeal);
-    localStorage.setItem("mealsByDate", JSON.stringify(meals));
-    localStorage.removeItem("mealConstructorMode"); 
-    alert("Meal added to today's plan!");
-    window.location.href = "today.html";
+  if (source === 'recipes' || source === 'plans') { // 👈 сюда добавляем plans
+    saveAsRecipe();
   } else {
-    // fallback — to save to currentMeal
-    localStorage.setItem('currentMeal', JSON.stringify(newMeal));
-    alert("Meal saved.");
-    window.history.back();
+    saveAsMeal();
   }
 }
 
-// Function to save the recipe to "My Recipes"
-function saveToMyRecipes() {
-  let savedRecipes = JSON.parse(localStorage.getItem('myRecipes')) || [];
 
-  // Counting the nutrients
-  let totalW = 0, totalP = 0, totalF = 0, totalC = 0, totalK = 0;
-  ingredients.forEach(ingredient => {
-    totalW += ingredient.weight;
-    totalP += ingredient.proteins;
-    totalF += ingredient.fats;
-    totalC += ingredient.carbs;
-    totalK += ingredient.kcal;
+function saveAsRecipe() {
+  const token = localStorage.getItem('token');
+  const body = {
+    name: mealName.value || "Untitled Recipe",
+    products: ingredients.map(ing => ({
+      product: {
+        name: ing.name,
+        calories: ing.kcal,
+        protein: ing.proteins,
+        fat: ing.fats,
+        carbs: ing.carbs
+      },
+      amountInGrams: ing.weight
+    }))
+  };
+
+  const method = editingId ? 'PUT' : 'POST';
+  const url = editingId ? `http://localhost:8080/recipes/${editingId}` : 'http://localhost:8080/recipes';
+
+  fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(body)
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to save recipe");
+        return res.json();
+      })
+      .then(() => {
+        const source = localStorage.getItem('navigationSource'); // 👈
+        localStorage.removeItem('navigationSource');
+        localStorage.removeItem('editItemId');
+
+        if (source === 'plans') {
+          window.location.href = 'planconstructor.html';
+        } else {
+          window.location.href = 'myrecipes.html';
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error saving recipe.");
+      });
+      }
+
+function saveAsMeal() {
+  const token = localStorage.getItem('token');
+  const selectedDate = localStorage.getItem('selectedDate') || new Date().toISOString().split('T')[0];
+
+  const body = {
+    title: mealName.value || "Untitled Meal",
+    products: ingredients.map(ing => ({
+      product: {
+        name: ing.name,
+        calories: ing.kcal,
+        protein: ing.proteins,
+        fat: ing.fats,
+        carbs: ing.carbs
+      },
+      amountInGrams: ing.weight
+    }))
+  };
+
+  const method = editingId ? 'PUT' : 'POST';
+  const url = editingId ? `http://localhost:8080/meals/${editingId}` : `http://localhost:8080/meals/${selectedDate}/add`;
+
+  fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify(body)
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to save meal");
+      return res.json();
+    })
+    .then(() => {
+      localStorage.removeItem('navigationSource');
+      window.location.href = 'today.html';
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error saving meal.");
+    });
+}
+
+// --- My Recipes functionality ---
+let availableRecipes = [];
+
+function loadFromMyRecipes() {
+  const container = document.getElementById('recipe-select-container');
+  if (container.style.display === 'none' || container.style.display === '') {
+    fetchRecipesForSelector();
+    container.style.display = 'block';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function fetchRecipesForSelector() {
+  const token = localStorage.getItem('token');
+  fetch('http://localhost:8080/recipes', {
+    headers: { "Authorization": "Bearer " + token }
+  })
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to fetch recipes');
+      return res.json();
+    })
+    .then(data => {
+      availableRecipes = data.slice(0, 10); // Только первые 10 рецептов
+      renderRecipeList(availableRecipes);
+    })
+    .catch(err => {
+      console.error('Error loading recipes:', err);
+    });
+}
+
+function renderRecipeList(recipes) {
+  const recipeList = document.getElementById('recipe-list');
+  const recipeSearch = document.getElementById('recipe-search');
+
+  recipeList.innerHTML = '';
+  if (!recipes.length) {
+    recipeList.innerHTML = '<p style="padding:8px; color:#777;">No recipes found</p>';
+    return;
+  }
+
+  recipes.forEach(recipe => {
+    const item = document.createElement('div');
+    item.textContent = recipe.name || 'Untitled Recipe';
+    item.classList.add('recipe-item');
+    item.style.padding = '8px';
+    item.style.cursor = 'pointer';
+    item.style.borderBottom = '1px solid #eee';
+
+    item.addEventListener('click', () => {
+      loadRecipeIntoConstructor(recipe);
+      document.getElementById('recipe-select-container').style.display = 'none'; // Скрываем выбор после выбора
+    });
+
+    recipeList.appendChild(item);
   });
 
-  let newRecipeData = {
-    name: mealName.value,
-    mealData: {
-      name: mealName.value,
-      ingredients: ingredients,
-      totalWeight: Math.round(totalW),
-      totalProteins: Math.round(totalP),
-      totalFats: Math.round(totalF),
-      totalCarbs: Math.round(totalC),
-      totalKcal: Math.round(totalK)
-    }
-  };
-
-  const editIndex = localStorage.getItem('editRecipeIndex');
-
-  if (editIndex !== null) {
-    // Reload the recipe
-    savedRecipes[editIndex] = newRecipeData;
-    localStorage.removeItem('editRecipe');
-    localStorage.removeItem('editRecipeIndex');
-    alert('Recipe updated!');
-  } else {
-    // New recipe
-    let recipeName = prompt("Enter a name for your recipe:");
-    if (!recipeName) return;
-    if (savedRecipes.find(r => r.name === recipeName)) {
-      alert("A recipe with this name already exists.");
-      return;
-    }
-    newRecipeData.name = recipeName;
-    savedRecipes.push(newRecipeData);
-    alert('Recipe saved to My Recipes!');
-  }
-
-  localStorage.setItem('myRecipes', JSON.stringify(savedRecipes));
+  // Добавляем обработчик поиска (только один раз)
+  recipeSearch.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+    const filtered = availableRecipes.filter(r => (r.name || '').toLowerCase().includes(query));
+    renderRecipeList(filtered);
+  }, { once: true });
 }
 
-// Placeholder: Load a recipe from API
-function loadFromAPI() {
-  // Example static data, normally you would fetch from an API
-  let apiIngredients = [
-    { name: 'Chicken Breast', weight: 150, proteins: 22, fats: 3, carbs: 0, kcal: 110 },
-    { name: 'Olive Oil', weight: 10, proteins: 0, fats: 10, carbs: 0, kcal: 90 },
-  ];
+function loadRecipeIntoConstructor(recipe) {
+  mealName.value = recipe.name || '';
+  ingredients = [];
 
-  ingredients = apiIngredients;
+  recipe.products.forEach(item => {
+    ingredients.push({
+      name: item.product.name,
+      weight: item.amountInGrams,
+      proteins: item.product.protein,
+      fats: item.product.fat,
+      carbs: item.product.carbs,
+      kcal: item.product.calories
+    });
+  });
+
   updateIngredientTable();
   updateTotals();
 }
 
-// Load a saved recipe from "My Recipes"
-function loadFromMyRecipes() {
-  let savedRecipes = JSON.parse(localStorage.getItem('myRecipes')) || [];
-  if (savedRecipes.length > 0) {
-    let recipe = savedRecipes[0]; // Load the first recipe for now
-    mealName.value = recipe.mealData.name;
-    ingredients = recipe.mealData.ingredients;
-    updateIngredientTable();
-    updateTotals();
-  } else {
-    alert('No recipes found.');
+
+document.addEventListener("DOMContentLoaded", () => {
+  editingId = localStorage.getItem('editItemId');
+  editingType = localStorage.getItem('navigationSource');
+
+  const editStatusDiv = document.getElementById('edit-status');
+  if (editStatusDiv) {
+    if (editingId && editingType === 'recipes') {
+      editStatusDiv.textContent = 'Editing Recipe';
+    } else if (editingId && editingType === 'meals') {
+      editStatusDiv.textContent = 'Editing Meal';
+    } else {
+      editStatusDiv.textContent = 'Create New';
+    }
   }
+
+  const token = localStorage.getItem('token');
+
+  if (editingId && editingType && token) {
+    let url = '';
+if (editingType === 'recipes') {
+  url = `http://localhost:8080/recipes/${editingId}`;
+} else if (editingType === 'meals') {
+  url = `http://localhost:8080/meals/${editingId}`;
+} else if (editingType === 'plans') {
+  url = `http://localhost:8080/recipes/${editingId}`; 
 }
 
-// Edit Recipe
-window.addEventListener('DOMContentLoaded', () => {
-  const editRecipe = JSON.parse(localStorage.getItem('editRecipe'));
-  if (editRecipe) {
-    mealName.value = editRecipe.name;
-    ingredients = editRecipe.mealData.ingredients;
-    updateIngredientTable();
-    updateTotals();
+    fetch(url, {
+      headers: { "Authorization": "Bearer " + token }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load item for editing');
+        return res.json();
+      })
+      .then(data => {
+        if (editingType === 'recipes' || editingType === 'plans') {
+          mealName.value = data.name || "Untitled Recipe";
+        } else if (editingType === 'meals') {
+          mealName.value = data.title || "Untitled Meal";
+        }
+    
+        ingredients = [];
+    
+        data.products.forEach(item => {
+          ingredients.push({
+            name: item.product.name,
+            weight: item.amountInGrams,
+            proteins: item.product.protein,
+            fats: item.product.fat,
+            carbs: item.product.carbs,
+            kcal: item.product.calories
+          });
+        });
+    
+        updateIngredientTable();
+        updateTotals();
+      })
+      .catch(err => {
+        console.error('Error loading item for editing:', err);
+        alert('Failed to load item for editing.');
+      });
+    
   }
 });
 
-// Function to save meal changes in the constructor
-function saveMealChanges() {
-  // Get the values from the form fields
-  const mealTitle = document.getElementById('mealTitle').value;
-  const mealCalories = document.getElementById('mealCalories').value;
-  const mealProteins = document.getElementById('mealProteins').value;
-  const mealFats = document.getElementById('mealFats').value;
-  const mealCarbs = document.getElementById('mealCarbs').value;
-  
-  // Get the meals data from localStorage, or initialize it if it doesn't exist
-  const meals = JSON.parse(localStorage.getItem('mealsByDate')) || {};
-  
-  // Get the currently selected date
-  const selectedDate = localStorage.getItem('selectedDate');
-
-  // Create a new meal object with the updated values
-  const newMeal = {
-    name: mealTitle,
-    calories: mealCalories,
-    protein: mealProteins,
-    fat: mealFats,
-    carbs: mealCarbs,
-  };
-
-  // Check if we're editing an existing meal or adding a new one
-  if (localStorage.getItem('editMealIndex') !== null) {
-    // If we're editing, update the existing meal at the specified index
-    const index = localStorage.getItem('editMealIndex');
-    meals[selectedDate][index] = newMeal;
-    
-    // Remove the index from localStorage after editing
-    localStorage.removeItem('editMealIndex');
-  } else {
-    // If it's a new meal, add it to the meals array for the selected date
-    if (!meals[selectedDate]) {
-      meals[selectedDate] = [];
-    }
-    meals[selectedDate].push(newMeal);
-  }
-
-  // Save the updated meals data back to localStorage
-  localStorage.setItem('mealsByDate', JSON.stringify(meals));
-
-  // Redirect back to the 'today.html' page to show the updated meals
-  window.location.href = 'today.html';
-}

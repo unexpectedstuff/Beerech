@@ -7,18 +7,27 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div id="edit-status" style="text-align:center; font-weight:bold; color:green; margin:10px 0;"></div>
   <div class="page-container">
     <div class="mealconstructor-wrapper">
     <div class="mealconstructor-header">
-
+<!-- 
         <div class="mealconstructor-item" onclick="loadFromAPI()"> 
             <img src="images/plus.png" alt="Download a Recipe"  class="plus-image"/>
             <span>Download a Recipe</span>
-        </div>
+        </div> -->
       <div class="mealconstructor-item" onclick="loadFromMyRecipes()"> 
         <img src="images/plus.png" alt="Use My Recipe" class="plus-image"/>
         <span>Use My Recipe</span>
     </div>
+    <div id="recipe-select-container">
+      <input type="text" id="recipe-search" placeholder="Search recipe..." />
+      <div id="recipe-list"></div>
+    </div>
+    
+    
+    
+    
 </div>
     <div class="meal-title-block">
       <label for="meal-name">Meal Name:</label>
@@ -45,7 +54,7 @@
             <th>Proteins (g)</th>
             <th>Fats (g)</th>
             <th>Carbs (g)</th>
-            <th>Kcal</th>
+            <th>Calories</th>
             <th></th>
           </tr>
         </thead>

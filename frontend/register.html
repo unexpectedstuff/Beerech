@@ -1,31 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-    <div class="green-container"> 
-        <div class="welcome-box"> 
-            <img src="images/logo.png" alt="logo" class="logo">
+  <div class="green-container">
+    <div class="welcome-box">
+      <img src="images/logo.png" alt="logo" class="logo" />
     </div>
-    <div class="register-container"> 
-        <p>Enter your email, please:</p>
-        <input type="email" id="email" placeholder="........." class="input-field">
-        <p>Create a login:</p>
-        <input type="text" id="regLogin" placeholder="........." class="input-field">
-        <p>Create a password:</p>
-        <input type="password" id="regPassword" placeholder="........." class="input-field">
-        <p>Confirm your password:</p>
-        <input type="password" id="confirmPassword" placeholder="........." class="input-field">
+
+    <div class="login-container">
+      <p>Your email:</p>
+      <input type="email" id="email" placeholder="Enter your email" class="input-field" />
+      
+      <p>Your name:</p>
+      <input type="text" id="name" placeholder="Enter your name" class="input-field" />
+
+      <p>Password:</p>
+      <input type="password" id="password" placeholder="Enter password" class="input-field" />
+
+      <p>Confirm Password:</p>
+      <input type="password" id="confirm-password" placeholder="Repeat password" class="input-field" />
     </div>
+
     <div class="button-row">
-        <a href="info.html" class="registerButton inactive" id="registerButton">Register</a>
-        <a href="login.html" class="register">I already have an account</a>
+      <button class="registerButton inactive" id="registerButton">Register</button>
+      <p id="register-error" style="display:none; color:red; font-weight:600;"></p>
+      <a href="login.html" class="register">Already have an account?</a>
     </div>
+
     <script src="js/register.js"></script>
-    </div>
+  </div>
 </body>
 </html>
