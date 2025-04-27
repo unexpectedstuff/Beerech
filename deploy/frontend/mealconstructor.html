@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meal Constructor</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="edit-status" style="text-align:center; font-weight:bold; color:green; margin:10px 0;"></div>
+  <div class="page-container">
+    <div class="mealconstructor-wrapper">
+    <div class="mealconstructor-header">
+<!-- 
+        <div class="mealconstructor-item" onclick="loadFromAPI()"> 
+            <img src="images/plus.png" alt="Download a Recipe"  class="plus-image"/>
+            <span>Download a Recipe</span>
+        </div> -->
+      <div class="mealconstructor-item" onclick="loadFromMyRecipes()"> 
+        <img src="images/plus.png" alt="Use My Recipe" class="plus-image"/>
+        <span>Use My Recipe</span>
+    </div>
+    <div id="recipe-select-container">
+      <input type="text" id="recipe-search" placeholder="Search recipe..." />
+      <div id="recipe-list"></div>
+    </div>
+    
+    
+    
+    
+</div>
+    <div class="meal-title-block">
+      <label for="meal-name">Meal Name:</label>
+      <input type="text" id="meal-name" placeholder="Enter meal name..." />
+    </div>
+
+    <div class="meal-table-container">
+      <table id="ingredient-table">
+        <colgroup>
+            <col style="width: 20px;">
+            <col style="width: 70px;">
+            <col style="width: 60px;">
+            <col style="width: 60px;">
+            <col style="width: 60px;">
+            <col style="width: 60px;">
+            <col style="width: 60px;">
+            <col style="width: 30px;">
+          </colgroup>
+        <thead>
+          <tr>
+            <th>№</th>
+            <th>Ingredient</th>
+            <th>Weight (g)</th>
+            <th>Proteins (g)</th>
+            <th>Fats (g)</th>
+            <th>Carbs (g)</th>
+            <th>Calories</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ingredient-body">
+
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="2">Total</td>
+            <td id="total-weight">0</td>
+            <td id="total-proteins">0</td>
+            <td id="total-fats">0</td>
+            <td id="total-carbs">0</td>
+            <td id="total-kcal">0</td>
+            <td></td>
+          </tr>
+          <tr class="per100g-row">
+            <td colspan="2">Total per 100g</td>
+            <td>100</td>
+            <td id="per100-proteins">0</td>
+            <td id="per100-fats">0</td>
+            <td id="per100-carbs">0</td>
+            <td id="per100-kcal">0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <button class="add-ingredient-btn" onclick="addIngredient()">+ Add new ingredient</button>
+    </div>
+</div>
+    <div class="mealconstructor-actions">
+      <button class="save-button" onclick="saveMealAndReturn()">Ready</button>
+      <button class="save-recipe-btn" onclick="saveToMyRecipes()">♡ Save to My Recipes</button>
+    </div>
+  </div>
+
+  <script src="js/mealconstructor.js"></script>
+</body>
+</html>

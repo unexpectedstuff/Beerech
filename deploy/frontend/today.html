@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Today</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="green-container">
+    <div class="scroll-content">
+    <div class="date-nav">
+      <div id="date-list" class="date-scroll">
+        <div class="date-card selected">Apr, 21, Mon</div>
+        <div class="date-card">Apr, 22, Tue</div>
+        <div class="date-card">Apr, 23, Wed</div>
+        <div class="date-card">Apr, 24, Thu</div>
+        <div class="date-card">Apr, 25, Fri</div>
+        <div class="date-card">Apr, 26, Sat</div>
+        <div class="date-card">Apr, 27, Sun</div>
+      </div>
+    </div>
+
+    <div id="meal-container"></div>
+</div>
+
+    <div class="meals-btn">
+      <img src="images/back.png" class="meal-btn" title="Back" onclick="navigateTo('profile.html')" />
+      <img src="images/add.png" class="meal-btn" title="Add" onclick="navigateTo('mealconstructor.html')"/>
+    </div>
+
+
+    <div id="totals-container" class="fixed-total">   
+          <div class="total-card">
+            <div class="nutrition-info">
+              <div>
+                <span id="calories-percent">0%</span>
+                <p id="total-info">—</p>
+                <span>Total</span> 
+              </div>
+              <div>
+                <span id="protein-percent">0%</span>
+                <p id="proteins-info">—</p>
+                <span>Proteins</span>
+              </div>
+              <div>
+                <span id="fat-percent">0%</span>
+                <p id="fats-info">—</p>
+                <span>Fats</span>
+              </div>
+              <div>
+                <span id="carbs-percent">0%</span>
+                <p id="carbs-info">—</p>
+                <span>Carbs</span>
+              </div>
+            </div>
+          </div>
+  </div>
+
+  <script src="js/today.js"></script>
+</body>
+</html>

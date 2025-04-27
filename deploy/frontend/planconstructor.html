@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Plan</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="green-container">
+    <p id="planTitle" class="planconstructor-title">Plan 1</p>  
+    <div class="scroll-page">
+
+        <div id="planconstructor-container">
+
+        <div class="planconstructor-card">
+          <div class="meal-first">            
+              <p class="plancons-title">Breakfast</p>      
+           <div class="meal-actions">
+            <img src="images/edit.png" class="icon-btn" title="Edit" />
+              </div> 
+          </div>
+           <div class="meal-second">
+              <p class="plancons-calories">455 kcal</p> 
+          <div class="meal-actions">
+            <img src="images/delete.png" class="icon-btn" title="Delete" />
+           </div> 
+          </div>
+              <div class="meal-nutrients">
+                <span>Proteins: 30g</span>
+                <span>Fats: 15g</span>
+                <span>Carbs: 60g</span>
+              </div>
+         </div>
+    </div>
+  </div>
+
+      <div class="meals-btn">
+        <img src="images/back.png" class="meal-btn" title="Back" onclick="navigateTo('plans.html')" />
+        <button class="save-btn" title="Save" onclick="savePlan()">Save Plan</button>
+        <img src="images/add.png" class="meal-btn" title="Add" onclick="navigateTo('mealconstructor.html')" />
+      </div>
+
+
+  <div id="totalplanconstructor-container" class="fixed-total">   
+    <div class="planconstructortotal-card">
+      <div class="planconstructornutrition-info">
+        <div>
+          <span id="planconstructorcalories-percent">0%</span>
+          <p id="planconstructortotal-info">—</p>
+          <span>Total</span> 
+        </div>
+        <div>
+          <span id="planconstructorprotein-percent">0%</span>
+          <p id="planconstructorproteins-info">—</p>
+          <span>Proteins</span>
+        </div>
+        <div>
+          <span id="planconstructorfat-percent">0%</span>
+          <p id="planconstructorfats-info">—</p>
+          <span>Fats</span>
+        </div>
+        <div>
+          <span id="planconstructorcarbs-percent">0%</span>
+          <p id="planconstructorcarbs-info">—</p>
+          <span>Carbs</span>
+        </div>
+      </div>
+    </div>
+   </div>
+  </div>
+  <script src="js/planconstructor.js"></script>
+</body>
+</html>

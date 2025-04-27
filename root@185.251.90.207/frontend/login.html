@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="green-container">
+      <div class="welcome-box">
+        <img src="images/logo.png" alt="logo" class="logo" />
+      </div>
+
+      <!-- Form for correct autocomplete -->
+      <form class="login-container" method="post" action="javascript:void(0)">
+        <p>Your login:</p>
+        <input
+          type="email"
+          id="login"
+          name="username"
+          placeholder="Enter your login here"
+          class="input-field"
+          autocomplete="username"
+          required
+        />
+
+        <p>Your password:</p>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Enter your password here"
+          class="input-field"
+          autocomplete="current-password"
+          required
+        />
+
+        <div class="button-row">
+          <button type="submit" class="enterButton inactive" id="enterButton">
+            Enter
+          </button>
+          <p
+            id="error-message"
+            style="display: none; color: red; font-weight: 600"
+          ></p>
+          <a href="register.html" class="register">I don't have an account</a>
+        </div>
+      </form>
+
+      <script src="js/login.js"></script>
+    </div>
+  </body>
+</html>
