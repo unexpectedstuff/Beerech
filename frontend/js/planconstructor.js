@@ -230,4 +230,16 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.save-btn').addEventListener('click', savePlan);
 
   loadAvailableRecipes();
+  //for new recipe to be added automatically
+  const newRecipeJson = localStorage.getItem('newRecipe');
+  if (newRecipeJson) {
+    try {
+      const newRecipe = JSON.parse(newRecipeJson);
+      selectedRecipes.push(newRecipe);
+      updateRecipeList();
+    } catch (e) {
+      console.error('Failed to parse new recipe:', e);
+    }
+    localStorage.removeItem('newRecipe');
+  }
 });

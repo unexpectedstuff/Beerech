@@ -183,27 +183,37 @@ function saveAsRecipe() {
       "Authorization": "Bearer " + token
     },
     body: JSON.stringify(body)
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to save recipe");
-        return res.json();
-      })
-      .then(() => {
-        const source = localStorage.getItem('navigationSource'); // 👈
-        localStorage.removeItem('navigationSource');
-        localStorage.removeItem('editItemId');
+  })
+    .then(res => {
+      if (!res.ok) throw new Error("Failed to save recipe");
+      return res.json();
+    })
+    .then(createdRecipe => { // 💬 createdRecipe - это объект, который сервер вернёт в ответ
+      const source = localStorage.getItem('navigationSource');
 
-        if (source === 'plans') {
-          window.location.href = 'planconstructor.html';
-        } else {
-          window.location.href = 'myrecipes.html';
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Error saving recipe.");
-      });
+      if (source === 'plans') {
+        // 💬 Сохраняем новый рецепт в localStorage
+        localStorage.setItem('newRecipe', JSON.stringify({
+          id: createdRecipe.id,
+          name: createdRecipe.name,
+          products: createdRecipe.products
+        }));
       }
+
+      localStorage.removeItem('navigationSource');
+      localStorage.removeItem('editItemId');
+
+      if (source === 'plans') {
+        window.location.href = 'planconstructor.html';
+      } else {
+        window.location.href = 'myrecipes.html';
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error saving recipe.");
+    });
+}
 
 function saveAsMeal() {
   const token = localStorage.getItem('token');
@@ -352,13 +362,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (editingId && editingType && token) {
     let url = '';
-if (editingType === 'recipes') {
-  url = `http://localhost:8080/recipes/${editingId}`;
-} else if (editingType === 'meals') {
-  url = `http://localhost:8080/meals/${editingId}`;
-} else if (editingType === 'plans') {
-  url = `http://localhost:8080/recipes/${editingId}`; 
-}
+    if (editingType === 'recipes') {
+      url = `http://localhost:8080/recipes/${editingId}`;
+    } else if (editingType === 'meals') {
+      url = `http://localhost:8080/meals/${editingId}`;
+    } else if (editingType === 'plans') {
+      url = `http://localhost:8080/recipes/${editingId}`;
+    }
 
     fetch(url, {
       headers: { "Authorization": "Bearer " + token }
@@ -373,9 +383,9 @@ if (editingType === 'recipes') {
         } else if (editingType === 'meals') {
           mealName.value = data.title || "Untitled Meal";
         }
-    
+
         ingredients = [];
-    
+
         data.products.forEach(item => {
           ingredients.push({
             name: item.product.name,
@@ -386,7 +396,7 @@ if (editingType === 'recipes') {
             kcal: item.product.calories
           });
         });
-    
+
         updateIngredientTable();
         updateTotals();
       })
@@ -394,7 +404,7 @@ if (editingType === 'recipes') {
         console.error('Error loading item for editing:', err);
         alert('Failed to load item for editing.');
       });
-    
+
   }
 });
 

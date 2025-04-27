@@ -21,7 +21,7 @@ function toggleLinkState() {
 loginInput.addEventListener('input', toggleLinkState);
 passwordInput.addEventListener('input', toggleLinkState);
 
-// Отправка запроса при клике
+// Fetch on click
 enterButton.addEventListener('click', function () {
   const email = loginInput.value.trim();
   const password = passwordInput.value.trim();
