@@ -2,7 +2,7 @@ const loginInput = document.getElementById('login');
 const passwordInput = document.getElementById('password');
 const enterButton = document.getElementById('enterButton');
 const errorBox = document.getElementById('error-message'); // элемент для вывода ошибок
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = '/api'; 
 
 function toggleLinkState() {
   const loginFilled = loginInput.value.trim() !== '';

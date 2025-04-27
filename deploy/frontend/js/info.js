@@ -1,14 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
   const genderButtons = document.querySelectorAll(".gender-btn");
   const continueButton = document.getElementById("continueButton");
-  const API_BASE_URL = window.location.origin;
+  const API_BASE_URL = '/api'; 
 
   const ageInput = document.getElementById("age");
   const heightInput = document.getElementById("height");
   const weightInput = document.getElementById("weight");
   const activitySelect = document.getElementById("activity");
+  const goalSelect = document.getElementById("goal"); // ДОБАВЬ! Если его нет в HTML, надо добавить скрытый или видимый выбор
 
-  let user = {}; // сюда загрузим текущий профиль
+  let user = {}; 
 
   const token = localStorage.getItem("token");
   if (!token) {
@@ -36,6 +37,9 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.activityLevel) {
         setSelectedActivity(data.activityLevel);
       }
+      if (data.goal && goalSelect) {
+        goalSelect.value = data.goal;
+      }
 
       validateForm();
     })
@@ -51,6 +55,10 @@ document.addEventListener("DOMContentLoaded", function () {
   function getSelectedGender() {
     const selected = document.querySelector('input[name="gender"]:checked');
     return selected ? selected.value.toUpperCase() : null;
+  }
+
+  function getSelectedGoal() {
+    return goalSelect ? goalSelect.value : "MAINTAIN";
   }
 
   function getSelectedActivityLevel() {
@@ -80,7 +88,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function validateForm() {
     const gender = getSelectedGender();
-
     const isFormValid =
       ageInput.value.trim() &&
       gender &&
@@ -126,15 +133,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const height = parseFloat(heightInput.value);
     const weight = parseFloat(weightInput.value);
     const activity = parseFloat(activitySelect.value);
+    const goal = getSelectedGoal();
 
     const updatedUser = {
       name: user.name || "Anonymous",
       email: user.email || "missing@example.com",
-      goal: user.goal || "MAINTAIN_WEIGHT",
       age,
       height,
       weight,
       gender,
+      goal,
       calorieTarget: Math.round(
         (10 * weight + 6.25 * height - 5 * age + (gender === "MALE" ? 5 : -161)) * activity
       ),

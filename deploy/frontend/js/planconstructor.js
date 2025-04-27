@@ -1,9 +1,28 @@
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = '/api';
 let selectedRecipes = [];
 let editingPlanId = null;
 
 function updateRecipeList() {
   const recipesContainer = document.getElementById('planconstructor-container');
+  
+  // clean when needed
+  if (!recipesContainer) return;
+
+  // Use  Set to delete dupes by id
+  const uniqueRecipes = [];
+  const seenIds = new Set();
+
+  selectedRecipes.forEach(recipe => {
+    if (!seenIds.has(recipe.id)) {
+      seenIds.add(recipe.id);
+      uniqueRecipes.push(recipe);
+    }
+  });
+
+  // update list withou dupes
+  selectedRecipes = uniqueRecipes;
+
+  // rerender
   recipesContainer.innerHTML = '';
 
   selectedRecipes.forEach((recipe, index) => {
@@ -35,6 +54,7 @@ function updateRecipeList() {
 
   attachEventListeners();
 }
+
 
 function attachEventListeners() {
   document.querySelectorAll('.edit-btn').forEach(btn => {
@@ -84,7 +104,7 @@ function savePlan() {
   };
 
   const method = editingPlanId ? 'PUT' : 'POST';
-  const url = editingPlanId ? `${API_BASE_URL}/meal-plans/${editingPlanId}` : `${API_BASE_URL}/meal-plans/add`;
+  const url = editingPlanId ? `${API_BASE_URL}/meal-plans/${editingPlanId}` : `${API_BASE_URL}/meal-plans`;
 
   fetch(url, {
     method,
@@ -128,9 +148,9 @@ function loadAvailableRecipes() {
           const selectedRecipe = recipes.find(r => r.id == selectedId);
           if (selectedRecipe) {
             selectedRecipes.push(selectedRecipe);
-            updateRecipeList();
+            updateRecipeList(); // Теперь updateRecipeList сам удаляет дубли!
           }
-        });
+        });        
       }
     })
     .catch(err => console.error('Error loading recipes:', err));
@@ -233,14 +253,26 @@ document.addEventListener('DOMContentLoaded', () => {
   loadAvailableRecipes();
   //for new recipe to be added automatically
   const newRecipeJson = localStorage.getItem('newRecipe');
+  localStorage.removeItem('newRecipe'); // Сразу очищаем
   if (newRecipeJson) {
     try {
       const newRecipe = JSON.parse(newRecipeJson);
-      selectedRecipes.push(newRecipe);
+
+      // Проверяем, есть ли уже рецепт с таким id
+      const existingIndex = selectedRecipes.findIndex(r => r.id === newRecipe.id);
+
+      if (existingIndex !== -1) {
+        // Если рецепт уже есть — заменяем его
+        selectedRecipes[existingIndex] = newRecipe;
+      } else {
+        // Если такого рецепта нет — добавляем в список
+        selectedRecipes.push(newRecipe);
+      }
+
       updateRecipeList();
     } catch (e) {
       console.error('Failed to parse new recipe:', e);
     }
-    localStorage.removeItem('newRecipe');
   }
+
 });

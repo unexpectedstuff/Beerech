@@ -1,4 +1,4 @@
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = '/api'; 
 // Function to navigate to a new page
 function navigateTo(url) {
   window.location.href = url;
@@ -67,9 +67,15 @@ function loadRecipes() {
     });
 }
 
-// ✅ Corrected version!
+//  Corrected version!
 function editRecipe(recipeId) {
   localStorage.setItem('editItemId', recipeId);
+  localStorage.setItem('navigationSource', 'recipes');
+  navigateTo('mealconstructor.html');
+}
+
+function startCreatingRecipe() {
+  localStorage.removeItem('editItemId');
   localStorage.setItem('navigationSource', 'recipes');
   navigateTo('mealconstructor.html');
 }

@@ -85,17 +85,16 @@ body {
   text-align: center;
 }
 
-.green-container{
-  flex-direction: column;
+.green-container {
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
-  max-width: 430px;
   min-height: 100vh;
+  max-width: 430px; 
   width: 100%;
-  padding-bottom: 150px;
-  text-align: center;
-  margin: 0 auto;
+  margin: 0 auto; 
   background-color: #C2D85E;
+  padding-bottom: 150px;
   box-sizing: border-box;
 }
 

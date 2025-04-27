@@ -1,4 +1,4 @@
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = '/api'; 
 const emailInput = document.getElementById('email');
 const nameInput = document.getElementById('name');
 const passwordInput = document.getElementById('password');
@@ -48,10 +48,10 @@ registerButton.addEventListener('click', () => {
       return res.json();
     })
     .then(data => {
-      // Сохраняем только сам токен
+      // Save only the token
       localStorage.setItem("token", data.token);
-      window.location.href = "profile.html";
-    })
+      window.location.href = "info.html"; // Go to target.html after registration
+    })    
     .catch(err => {
       errorBox.textContent = "Registration failed. Please check your input.";
       errorBox.style.display = "block";

@@ -1,4 +1,4 @@
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = '/api'; 
 
 function formatDate(date) {
   return date.toISOString().split('T')[0];

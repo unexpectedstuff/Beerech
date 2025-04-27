@@ -2,7 +2,7 @@ let ingredients = [];
 let editingId = null;
 let editingType = null;
 
-const API_BASE_URL = window.location.origin;
+const API_BASE_URL = '/api'; 
 const mealName = document.getElementById('meal-name');
 const ingredientTableBody = document.getElementById('ingredient-body');
 const totalWeight = document.getElementById('total-weight');
@@ -189,24 +189,23 @@ function saveAsRecipe() {
       if (!res.ok) throw new Error("Failed to save recipe");
       return res.json();
     })
-    .then(createdRecipe => { // 💬 createdRecipe - это объект, который сервер вернёт в ответ
+    .then(createdRecipe => {
       const source = localStorage.getItem('navigationSource');
 
       if (source === 'plans') {
-        // 💬 Сохраняем новый рецепт в localStorage
+        // ✨ Передаём новый рецепт обратно в план
         localStorage.setItem('newRecipe', JSON.stringify({
           id: createdRecipe.id,
           name: createdRecipe.name,
           products: createdRecipe.products
         }));
-      }
 
-      localStorage.removeItem('navigationSource');
-      localStorage.removeItem('editItemId');
-
-      if (source === 'plans') {
+        localStorage.removeItem('editItemId');
+        localStorage.removeItem('navigationSource');
         window.location.href = 'planconstructor.html';
       } else {
+        localStorage.removeItem('editItemId');
+        localStorage.removeItem('navigationSource');
         window.location.href = 'myrecipes.html';
       }
     })
@@ -215,6 +214,7 @@ function saveAsRecipe() {
       alert("Error saving recipe.");
     });
 }
+
 
 function saveAsMeal() {
   const token = localStorage.getItem('token');
@@ -325,6 +325,7 @@ function renderRecipeList(recipes) {
 }
 
 function loadRecipeIntoConstructor(recipe) {
+  // Just load the recipe into the form — no redirect!
   mealName.value = recipe.name || '';
   ingredients = [];
 
@@ -342,6 +343,8 @@ function loadRecipeIntoConstructor(recipe) {
   updateIngredientTable();
   updateTotals();
 }
+
+
 
 
 document.addEventListener("DOMContentLoaded", () => {
