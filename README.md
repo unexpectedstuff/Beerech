@@ -36,13 +36,14 @@ This is a Spring Boot based RESTful API for a calorie tracking application. It s
 
 ---
 
+# API Endpoints
+
 ## Authentication
 
 ### POST `/auth/register`
+**Description:** Register a new user.
 
-Register a new user.
-
-**Request:**
+**Request Example:**
 ```json
 {
   "email": "user@example.com",
@@ -51,20 +52,19 @@ Register a new user.
 }
 ```
 
-**Response:**
+**Response Example:**
 ```json
 {
-  "token": "eyJhbGci..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
 ---
 
 ### POST `/auth/login`
+**Description:** Login with email and password.
 
-Authenticate user and return JWT token.
-
-**Request:**
+**Request Example:**
 ```json
 {
   "email": "user@example.com",
@@ -72,10 +72,10 @@ Authenticate user and return JWT token.
 }
 ```
 
-**Response:**
+**Response Example:**
 ```json
 {
-  "token": "eyJhbGci..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
@@ -84,15 +84,9 @@ Authenticate user and return JWT token.
 ## User Profile
 
 ### GET `/user/profile`
+**Description:** Get current user profile.
 
-Get the current user's profile. Requires JWT token.
-
-**Headers:**
-```
-Authorization: Bearer <token>
-```
-
-**Response:**
+**Response Example:**
 ```json
 {
   "id": 1,
@@ -110,135 +104,247 @@ Authorization: Bearer <token>
 ---
 
 ### PUT `/user/profile`
+**Description:** Update user profile.
 
-Update the current user's profile.
-
-**Request:**
+**Request Example:**
 ```json
 {
-  "age": 30,
-  "weight": 75.5,
-  "height": 180,
+  "age": 31,
+  "weight": 76,
+  "height": 181,
   "gender": "MALE",
-  "goal": "MAINTAIN",
-  "calorieTarget": 2200
+  "goal": "LOSE",
+  "calorieTarget": 2000
 }
 ```
+
+**Response Example:** `200 OK`
 
 ---
 
 ## Meals
 
 ### GET `/meals/{date}`
+**Description:** Get meals for a specific date.
 
-Retrieve meals for a specific date.
-
-**Example:**
+**Example Request:**
 ```
-GET /meals/2024-12-30
+GET /meals/2025-04-27
+```
+
+**Response Example:**
+```json
+[
+  {
+    "id": 1,
+    "title": "Lunch",
+    "products": [
+      {
+        "id": 1,
+        "amountInGrams": 200,
+        "product": {
+          "name": "Chicken Breast",
+          "calories": 165,
+          "protein": 31,
+          "fat": 3.6,
+          "carbs": 0
+        }
+      }
+    ]
+  }
+]
 ```
 
 ---
 
 ### POST `/meals/{date}/add`
+**Description:** Add a meal for a specific date.
 
-Add a meal entry to a specific date.
-
-**Request:**
+**Request Example:**
 ```json
 {
-  "name": "Lunch",
+  "title": "Dinner",
   "products": [
-    { "productId": 1, "amount": 150 },
-    { "productId": 2, "amount": 200 }
+    {
+      "product": {
+        "name": "Salmon",
+        "calories": 208,
+        "protein": 20,
+        "fat": 13,
+        "carbs": 0
+      },
+      "amountInGrams": 150
+    }
+  ]
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 5,
+  "title": "Dinner",
+  "date": "2025-04-27",
+  "products": [...]
+}
+```
+
+---
+
+## Meal Plans
+
+### GET `/meal-plans`
+**Description:** Get all meal plans.
+
+**Response Example:**
+```json
+[
+  {
+    "id": 1,
+    "title": "Weekly Plan",
+    "recipes": [
+      { "id": 1, "name": "Breakfast Sandwich" },
+      { "id": 2, "name": "Chicken Salad" }
+    ]
+  }
+]
+```
+
+---
+
+### POST `/meal-plans/add`
+**Description:** Create a new meal plan.
+
+**Request Example:**
+```json
+{
+  "title": "Test Plan",
+  "recipes": [
+    { "id": 1 },
+    { "id": 3 }
+  ]
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 2,
+  "title": "Test Plan",
+  "recipes": [
+    { "id": 1, "name": "Apple Sandwich" },
+    { "id": 3, "name": "Banana Oatmeal" }
   ]
 }
 ```
 
 ---
 
-### GET `/meals/recent`
+### PUT `/meal-plans/{id}`
+**Description:** Update an existing meal plan.
 
-Retrieve the user's most recently added meals.
-
----
-
-### POST `/meals/{date}/apply-template`
-
-Apply a saved meal template to a selected date.
-
-**Request:**
+**Request Example:**
 ```json
 {
-  "templateId": 1
-}
-```
-
----
-
-## Meal Templates
-
-### POST `/meal-templates/save`
-
-Save a new meal template.
-
-**Request:**
-```json
-{
-  "name": "Standard Breakfast",
-  "mealEntries": [
-    { "productId": 3, "amount": 100 },
-    { "productId": 4, "amount": 50 }
+  "title": "Updated Plan",
+  "recipes": [
+    { "id": 1 },
+    { "id": 4 }
   ]
 }
 ```
 
----
-
-### GET `/meal-templates`
-
-Get all meal templates.
+**Response Example:** `200 OK`
 
 ---
 
-### GET `/meal-templates/{template_id}`
+### DELETE `/meal-plans/{id}`
+**Description:** Delete a meal plan.
 
-Get details for a specific template.
+**Example Request:**
+```
+DELETE /meal-plans/2
+```
+
+**Response Example:** `204 No Content`
 
 ---
 
-### DELETE `/meal-templates/{template_id}`
+### POST `/meal-plans/apply/{id}/{date}`
+**Description:** Apply a meal plan to a date.
 
-Delete a specific meal template.
+**Example Request:**
+```
+POST /meal-plans/apply/2/2025-05-01
+```
+
+**Response Example:**
+```json
+{
+  "status": "success"
+}
+```
 
 ---
 
 ## Products
 
 ### GET `/products`
+**Description:** List all products.
 
-List all available products.
+**Response Example:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Chicken Breast",
+    "calories": 165,
+    "protein": 31,
+    "fat": 3.6,
+    "carbs": 0
+  },
+  ...
+]
+```
 
----
+### GET `/products/{id}`
+**Description:** Get a specific product.
 
-### GET `/products/{product_id}`
-
-Get details for a specific product.
-
----
-
-### POST `/products/add`
-
-Add a new product.
-
-**Request:**
+**Response Example:**
 ```json
 {
-  "name": "Greek Yogurt",
-  "calories": 60,
-  "protein": 10,
-  "fat": 0.4,
-  "carbs": 3.6
+  "id": 1,
+  "name": "Chicken Breast",
+  "calories": 165,
+  "protein": 31,
+  "fat": 3.6,
+  "carbs": 0
+}
+```
+
+### POST `/products/add`
+**Description:** Add a new product.
+
+**Request Example:**
+```json
+{
+  "name": "Almonds",
+  "calories": 579,
+  "protein": 21,
+  "fat": 50,
+  "carbs": 22
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 7,
+  "name": "Almonds",
+  "calories": 579,
+  "protein": 21,
+  "fat": 50,
+  "carbs": 22
 }
 ```
 

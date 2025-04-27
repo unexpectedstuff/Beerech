@@ -43,4 +43,6 @@ Thumbs.db
 
 # Secret config
 src/main/resources/application-secret.properties
+/deploy/.env
+
 
